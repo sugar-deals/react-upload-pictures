@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import React,{ useCallback, useState } from "react"
 import Cropper from "react-easy-crop"
 import getCroppedImg from "./cropImage"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
@@ -29,7 +29,7 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSiz
     }
 
     if (!isOpen) {
-        return <></>
+        return (<div></div>)
     }
     return (
         <div className="modal modal-dialog modal-dialog-centered modal-dialog-scrollable fade modal-xl show" style={{ zIndex: 100000 }}>

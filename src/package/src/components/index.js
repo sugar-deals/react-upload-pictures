@@ -141,7 +141,7 @@ const UploadPictures = forwardRef((
   const ImagesRender = useCallback(() => {
 
     return (
-      <div>
+      <div className="row d-flex">
         {
           pictures && pictures.map((picture, index) => (
             <div className="postion-relative p-0 mx-2" key={index} style={{ width: width }}>

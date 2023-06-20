@@ -17,6 +17,7 @@
     "react-easy-crop": "^4.7.4",
     "react-scripts": "5.0.1",
     "sass": "^1.63.4",
+    "typescript": "^5.0.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -42,5 +43,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "copy-files": "^0.1.0"
   }
 }
