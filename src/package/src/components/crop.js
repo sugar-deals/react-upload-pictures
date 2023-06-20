@@ -25,6 +25,8 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSiz
             )
             picture.src = await croppedImage
             saveCropedPicture(picture);
+            setZoom(1)
+            setRotation(0)
         } catch (e) {
             console.error(e)
         }

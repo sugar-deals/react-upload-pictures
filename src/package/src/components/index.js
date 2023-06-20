@@ -157,6 +157,12 @@ const UploadPictures = forwardRef((
     setIndexCrop(false)
   }
 
+  const sendPictures = () => {
+    savePictures(pictures);
+    setPictures(false)
+    setOpen(false)
+
+  }
   return (
     <div ref={ref}>
       {
@@ -193,7 +199,7 @@ const UploadPictures = forwardRef((
                   <button type="button" onClick={() => { setOpen(false); setPictures([]); }} className="btn btn-secondary">
                     <FontAwesomeIcon icon={faXmark} />
                   </button>
-                  <button type="button" className="btn btn-primary" onClick={() => savePictures(pictures)}>
+                  <button type="button" className="btn btn-primary" onClick={sendPictures}>
                     <FontAwesomeIcon icon={faDownload} />
                   </button>
                 </div>

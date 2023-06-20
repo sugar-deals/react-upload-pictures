@@ -75,28 +75,11 @@ const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", img
         let newList = pictures.filter((_, i) => i !== index);
         setPictures(newList);
     };
-    const reorder = (arr, index) => {
-        let newList = [];
-        for (var i = 0; i < arr.length; i++) {
-            newList[i] = arr[index[i]];
-        }
-        return newList;
-    };
     const getChangedPos = (currentPos, newPos) => {
-        console.log(currentPos, newPos);
         let index = [];
-        for (var i = 0; i < pictures.length; i++) {
-            if (i >= currentPos && i < newPos) {
-                index[i] = i + 1;
-            }
-            else if (i === newPos) {
-                index[i] = currentPos;
-            }
-            else {
-                index[i] = i;
-            }
-        }
-        let newList = reorder(pictures, index);
+        let newList = pictures;
+        let pic = newList.splice(currentPos, 1);
+        newList.splice(newPos - 1, 0, pic[0]);
         setPictures(newList);
     };
     const DraggableRender = (0, react_1.useCallback)(() => {
@@ -123,6 +106,11 @@ const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", img
         setOpenCrop(false);
         setIndexCrop(false);
     };
+    const sendPictures = () => {
+        savePictures(pictures);
+        setPictures(false);
+        setOpen(false);
+    };
     return (react_1.default.createElement("div", { ref: ref },
         crop && react_1.default.createElement(crop_1.default, { picture: srcCrop, isOpen: openCrop, setOpenCrop: setOpenCrop, saveCropedPicture: saveCropedPicture, iconSize: iconSize }),
         open &&
@@ -140,7 +128,7 @@ const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", img
                         react_1.default.createElement("div", { className: "modal-footer" },
                             react_1.default.createElement("button", { type: "button", onClick: () => { setOpen(false); setPictures([]); }, className: "btn btn-secondary" },
                                 react_1.default.createElement(react_fontawesome_1.FontAwesomeIcon, { icon: free_solid_svg_icons_1.faXmark })),
-                            react_1.default.createElement("button", { type: "button", className: "btn btn-primary", onClick: () => savePictures(pictures) },
+                            react_1.default.createElement("button", { type: "button", className: "btn btn-primary", onClick: sendPictures },
                                 react_1.default.createElement(react_fontawesome_1.FontAwesomeIcon, { icon: free_solid_svg_icons_1.faDownload }))))),
                 crop && react_1.default.createElement("div", { className: (openCrop ? "modal-backdrop fade show" : "") }))),
         react_1.default.createElement("div", { className: (open ? "modal-backdrop fade show" : "") })));
