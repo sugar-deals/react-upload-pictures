@@ -1,13 +1,14 @@
-import React,{ useCallback, useState } from "react"
+import React, { useCallback, useState } from "react"
 import Cropper from "react-easy-crop"
 import getCroppedImg from "./cropImage"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faDownload, faXmark } from "@fortawesome/free-solid-svg-icons"
+import { faDownload, faRotateRight, faXmark } from "@fortawesome/free-solid-svg-icons"
 
 function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSize }) {
 
     const [crop, setCrop] = useState({ x: 0, y: 0 })
     const [zoom, setZoom] = useState(1)
+    const [rotation, setRotation] = useState(0)
     const [croppedAreaPixels, setCroppedAreaPixels] = useState(1)
 
     const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
@@ -20,6 +21,7 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSiz
             const croppedImage = await getCroppedImg(
                 picture.src,
                 croppedAreaPixels,
+                rotation
             )
             picture.src = await croppedImage
             saveCropedPicture(picture);
@@ -31,6 +33,7 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSiz
     if (!isOpen) {
         return (<div></div>)
     }
+
     return (
         <div className="modal modal-dialog modal-dialog-centered modal-dialog-scrollable fade modal-xl show" style={{ zIndex: 100000 }}>
             <div className="modal-dialog">
@@ -51,7 +54,30 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSiz
                             onCropChange={setCrop}
                             onCropComplete={onCropComplete}
                             onZoomChange={setZoom}
+                            rotation={rotation}
                         />
+                    </div>
+                    <div className="d-flex align-items-center justify-centent-between">
+
+                        <input
+                            type="range"
+                            className="form-range ms-2"
+                            type="range"
+                            value={zoom}
+                            min={1}
+                            max={3}
+                            step={0.1}
+                            aria-labelledby="Zoom"
+                            onChange={(e) => {
+                                setZoom(e.target.value)
+                            }}
+                        />
+                        <button className="btn btn-primary me-2" onClick={(e) => {
+                                setRotation(rotation === 270 ? 0 : rotation + 90)
+                            }}>
+                            <FontAwesomeIcon icon={faRotateRight} />
+                        </button>
+
                     </div>
                     <div className="modal-footer">
                         <button type="button" onClick={() => { setOpenCrop(false); }} className="btn btn-secondary">
