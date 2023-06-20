@@ -5,10 +5,10 @@ import { faDownload } from "@fortawesome/free-solid-svg-icons";
 
 
 function App() {
-  const childRef = useRef(null);
+  const ref = useRef();
 
   const setOpen = (open) => {
-    console.log(childRef);
+    ref.current.openModal(open)
   }
 
   const savePictures = (pictures) => {
@@ -20,7 +20,7 @@ function App() {
         <FontAwesomeIcon icon={faDownload} />
       </button>
       <UploadPictures
-        ref={childRef}
+        ref={ref}
         title="upload pictures"
         isOpen={false}
         imgExtension={['.jpg', '.jpeg', '.gif', '.png']}
