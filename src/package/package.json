@@ -7,7 +7,7 @@
   "types": "./dist/esm/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git@github.com:imadghssisse/react-upload-crop-drag-images.git"
+    "url": "git@github.com:imadghssisse/react-upload-pictures.git"
   },
   "scripts": {
     "build": "yarn clean && yarn build:esm && yarn copy-files && yarn build:cjs",
