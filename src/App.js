@@ -32,6 +32,7 @@ function App() {
         drag={true}
         crop={true}
         savePictures={savePictures}
+        multiple={false}
       />
     </div>
   )

@@ -23,6 +23,7 @@ const UploadPictures = forwardRef((
     drag = false,
     crop = false,
     savePictures,
+    multiple = true,
   },
   ref
 ) => {
@@ -125,7 +126,7 @@ const UploadPictures = forwardRef((
   const ImagesRender = useCallback(() => {
 
     return (
-      <div className="row d-flex">
+      <div className="row d-flex justify-content-center">
         {
           pictures && pictures.map((picture, index) => (
             <div className="postion-relative p-0 mx-2" key={index} style={{ width: width }}>
@@ -182,10 +183,10 @@ const UploadPictures = forwardRef((
                 <div className="modal-body">
                   <div className="row justify-content-center mb-5">
                     <div className="mb-3" style={{ width: "300px" }}>
-                      <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple />
+                      <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={multiple} />
                     </div>
                   </div>
-                  <div className="row d-flex">
+                  <div className="row d-flex justify-content-center">
                     {
                       drag && pictures.length > 0 ? (
                         <DraggableRender />
