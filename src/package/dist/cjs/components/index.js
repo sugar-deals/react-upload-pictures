@@ -11,7 +11,7 @@ const ERROR = {
     NOT_SUPPORTED_EXTENSION: 'NOT_SUPPORTED_EXTENSION',
     FILESIZE_TOO_LARGE: 'FILESIZE_TOO_LARGE'
 };
-const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", imgExtension = ['.jpg', '.jpeg', '.gif', '.png'], maxFileSize = 5242880, height = "200px", width = "200px", sizModal = "modal-xl", iconSize = "lg", drag = false, crop = false, savePictures, }, ref) => {
+const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", imgExtension = ['.jpg', '.jpeg', '.gif', '.png'], maxFileSize = 5242880, height = "200px", width = "200px", sizModal = "modal-xl", iconSize = "lg", drag = false, crop = false, savePictures, multiple = true, }, ref) => {
     (0, react_1.useImperativeHandle)(ref, () => ({
         openModal(status) {
             setOpen(status);
@@ -88,7 +88,7 @@ const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", img
             react_1.default.createElement(Image, { picture: picture, height: height, width: width, className: "mb-4" }))))));
     }, [pictures]);
     const ImagesRender = (0, react_1.useCallback)(() => {
-        return (react_1.default.createElement("div", { className: "row d-flex" }, pictures && pictures.map((picture, index) => (react_1.default.createElement("div", { className: "postion-relative p-0 mx-2", key: index, style: { width: width } },
+        return (react_1.default.createElement("div", { className: "row d-flex justify-content-center" }, pictures && pictures.map((picture, index) => (react_1.default.createElement("div", { className: "postion-relative p-0 mx-2", key: index, style: { width: width } },
             react_1.default.createElement(Actions, { index: index, iconSize: iconSize, remove: remove, cropPicture: cropPicture, crop: crop }),
             react_1.default.createElement(Image, { picture: picture, height: height, width: width, className: "mb-4" }))))));
     }, [pictures]);
@@ -123,8 +123,8 @@ const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", img
                         react_1.default.createElement("div", { className: "modal-body" },
                             react_1.default.createElement("div", { className: "row justify-content-center mb-5" },
                                 react_1.default.createElement("div", { className: "mb-3", style: { width: "300px" } },
-                                    react_1.default.createElement("input", { onChange: onFileChange, className: "form-control", type: "file", id: "formFile", multiple: true }))),
-                            react_1.default.createElement("div", { className: "row d-flex" }, drag && pictures.length > 0 ? (react_1.default.createElement(DraggableRender, null)) : (react_1.default.createElement(ImagesRender, null)))),
+                                    react_1.default.createElement("input", { onChange: onFileChange, className: "form-control", type: "file", id: "formFile", multiple: multiple }))),
+                            react_1.default.createElement("div", { className: "row d-flex justify-content-center" }, drag && pictures.length > 0 ? (react_1.default.createElement(DraggableRender, null)) : (react_1.default.createElement(ImagesRender, null)))),
                         react_1.default.createElement("div", { className: "modal-footer" },
                             react_1.default.createElement("button", { type: "button", onClick: () => { setOpen(false); setPictures([]); }, className: "btn btn-secondary" },
                                 react_1.default.createElement(react_fontawesome_1.FontAwesomeIcon, { icon: free_solid_svg_icons_1.faXmark })),

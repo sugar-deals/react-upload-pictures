@@ -8,7 +8,7 @@ const ERROR = {
     NOT_SUPPORTED_EXTENSION: 'NOT_SUPPORTED_EXTENSION',
     FILESIZE_TOO_LARGE: 'FILESIZE_TOO_LARGE'
 };
-const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = ['.jpg', '.jpeg', '.gif', '.png'], maxFileSize = 5242880, height = "200px", width = "200px", sizModal = "modal-xl", iconSize = "lg", drag = false, crop = false, savePictures, }, ref) => {
+const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = ['.jpg', '.jpeg', '.gif', '.png'], maxFileSize = 5242880, height = "200px", width = "200px", sizModal = "modal-xl", iconSize = "lg", drag = false, crop = false, savePictures, multiple = true, }, ref) => {
     useImperativeHandle(ref, () => ({
         openModal(status) {
             setOpen(status);
@@ -85,7 +85,7 @@ const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = [
             React.createElement(Image, { picture: picture, height: height, width: width, className: "mb-4" }))))));
     }, [pictures]);
     const ImagesRender = useCallback(() => {
-        return (React.createElement("div", { className: "row d-flex" }, pictures && pictures.map((picture, index) => (React.createElement("div", { className: "postion-relative p-0 mx-2", key: index, style: { width: width } },
+        return (React.createElement("div", { className: "row d-flex justify-content-center" }, pictures && pictures.map((picture, index) => (React.createElement("div", { className: "postion-relative p-0 mx-2", key: index, style: { width: width } },
             React.createElement(Actions, { index: index, iconSize: iconSize, remove: remove, cropPicture: cropPicture, crop: crop }),
             React.createElement(Image, { picture: picture, height: height, width: width, className: "mb-4" }))))));
     }, [pictures]);
@@ -120,8 +120,8 @@ const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = [
                         React.createElement("div", { className: "modal-body" },
                             React.createElement("div", { className: "row justify-content-center mb-5" },
                                 React.createElement("div", { className: "mb-3", style: { width: "300px" } },
-                                    React.createElement("input", { onChange: onFileChange, className: "form-control", type: "file", id: "formFile", multiple: true }))),
-                            React.createElement("div", { className: "row d-flex" }, drag && pictures.length > 0 ? (React.createElement(DraggableRender, null)) : (React.createElement(ImagesRender, null)))),
+                                    React.createElement("input", { onChange: onFileChange, className: "form-control", type: "file", id: "formFile", multiple: multiple }))),
+                            React.createElement("div", { className: "row d-flex justify-content-center" }, drag && pictures.length > 0 ? (React.createElement(DraggableRender, null)) : (React.createElement(ImagesRender, null)))),
                         React.createElement("div", { className: "modal-footer" },
                             React.createElement("button", { type: "button", onClick: () => { setOpen(false); setPictures([]); }, className: "btn btn-secondary" },
                                 React.createElement(FontAwesomeIcon, { icon: faXmark })),
