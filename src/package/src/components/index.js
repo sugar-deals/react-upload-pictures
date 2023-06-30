@@ -24,6 +24,11 @@ const UploadPictures = forwardRef((
     crop = false,
     savePictures,
     multiple = true,
+    aspect = 4 / 3,
+    errorsMessages = {
+      NOT_SUPPORTED_EXTENSION: 'not supported extension',
+      FILESIZE_TOO_LARGE: 'file size too large'
+    }
   },
   ref
 ) => {
@@ -35,7 +40,7 @@ const UploadPictures = forwardRef((
   }));
   const [open, setOpen] = useState(false)
   const [pictures, setPictures] = useState([])
-  const [fileErrors, setFileErrors] = useState(false)
+  const [errors, setErrors] = useState([])
   const [srcCrop, setSrcCrop] = useState(false)
   const [openCrop, setOpenCrop] = useState(false)
   const [indexCrop, setIndexCrop] = useState(false)
@@ -59,8 +64,10 @@ const UploadPictures = forwardRef((
   }
 
   const onFileChange = event => {
+    setErrors([]);
     let allFilePromises = []
     let fileError = [];
+    let fileErrors = [];
     if (event.target.files) {
       Array.from(event.target.files).map((file) => {
         if (!hasExtension(file.name)) {
@@ -77,19 +84,21 @@ const UploadPictures = forwardRef((
           fileErrors.push(fileError);
         }
         if (fileErrors.length > 0) {
-          setFileErrors(fileErrors);
-          return
+          setErrors(fileErrors);
+          return false
         }
         allFilePromises.push(readFile(file));
       })
-      Promise.all(allFilePromises).then(newFilesData => {
-        let files = []
-        newFilesData.forEach(newFileData => {
-          newFileData.file.src = newFileData.dataURL
-          files.push(newFileData.file);
+      if (fileErrors.length === 0) {
+        Promise.all(allFilePromises).then(newFilesData => {
+          let files = []
+          newFilesData.forEach(newFileData => {
+            newFileData.file.src = newFileData.dataURL
+            files.push(newFileData.file);
+          });
+          setPictures(files);
         });
-        setPictures(files);
-      });
+      }
     }
   };
 
@@ -167,7 +176,7 @@ const UploadPictures = forwardRef((
   return (
     <div ref={ref}>
       {
-        crop && <Crop picture={srcCrop} isOpen={openCrop} setOpenCrop={setOpenCrop} saveCropedPicture={saveCropedPicture} iconSize={iconSize} />
+        crop && <Crop picture={srcCrop} isOpen={openCrop} setOpenCrop={setOpenCrop} saveCropedPicture={saveCropedPicture} iconSize={iconSize} aspect={aspect} />
       }
 
       {
@@ -181,6 +190,19 @@ const UploadPictures = forwardRef((
                   <button type="button" className="btn-close" onClick={() => { setOpen(false); setPictures([]); }}></button>
                 </div>
                 <div className="modal-body">
+                  {
+                    errors.length > 0 && (
+                      <div>
+                        {
+                          errors.map((error, key) => (
+                            <div className="alert alert-warning" key={key} role="alert">
+                              {errorsMessages[error.type]}
+                            </div>
+                          ))
+                        }
+                      </div>
+                    )
+                  }
                   <div className="row justify-content-center mb-5">
                     <div className="mb-3" style={{ width: "300px" }}>
                       <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={multiple} />
@@ -197,7 +219,7 @@ const UploadPictures = forwardRef((
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button type="button" onClick={() => { setOpen(false); setPictures([]); }} className="btn btn-secondary">
+                  <button type="button" onClick={() => { setOpen(false); setPictures([]); setErrors([]); }} className="btn btn-secondary">
                     <FontAwesomeIcon icon={faXmark} />
                   </button>
                   <button type="button" className="btn btn-primary" onClick={sendPictures}>

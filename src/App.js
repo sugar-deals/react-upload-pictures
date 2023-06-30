@@ -25,7 +25,7 @@ function App() {
         isOpen={false}
         imgExtension={['.jpg', '.jpeg', '.gif', '.png']}
         maxFileSize={5242880}
-        height="200px"
+        height="300px"
         width="200px"
         sizModal="modal-xl"
         iconSize="lg"
@@ -33,6 +33,7 @@ function App() {
         crop={true}
         savePictures={savePictures}
         multiple={false}
+        aspect= {15/16}
       />
     </div>
   )

@@ -4,7 +4,7 @@ import getCroppedImg from "./cropImage"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faDownload, faRotateRight, faXmark } from "@fortawesome/free-solid-svg-icons"
 
-function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSize }) {
+function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSize, aspect }) {
 
     const [crop, setCrop] = useState({ x: 0, y: 0 })
     const [zoom, setZoom] = useState(1)
@@ -52,7 +52,7 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSiz
                             image={picture.src}
                             crop={crop}
                             zoom={zoom}
-                            aspect={4 / 3}
+                            aspect={aspect}
                             onCropChange={setCrop}
                             onCropComplete={onCropComplete}
                             onZoomChange={setZoom}
