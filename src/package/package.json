@@ -1,6 +1,6 @@
 {
   "name": "react-upload-pictures",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "upload pictures with crop and drag",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",

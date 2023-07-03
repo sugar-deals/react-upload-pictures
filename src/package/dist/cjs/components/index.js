@@ -11,7 +11,10 @@ const ERROR = {
     NOT_SUPPORTED_EXTENSION: 'NOT_SUPPORTED_EXTENSION',
     FILESIZE_TOO_LARGE: 'FILESIZE_TOO_LARGE'
 };
-const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", imgExtension = ['.jpg', '.jpeg', '.gif', '.png'], maxFileSize = 5242880, height = "200px", width = "200px", sizModal = "modal-xl", iconSize = "lg", drag = false, crop = false, savePictures, multiple = true, }, ref) => {
+const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", imgExtension = ['.jpg', '.jpeg', '.gif', '.png'], maxFileSize = 5242880, height = "200px", width = "200px", sizModal = "modal-xl", iconSize = "lg", drag = false, crop = false, savePictures, multiple = true, aspect = 4 / 3, errorsMessages = {
+    NOT_SUPPORTED_EXTENSION: 'not supported extension',
+    FILESIZE_TOO_LARGE: 'file size too large'
+} }, ref) => {
     (0, react_1.useImperativeHandle)(ref, () => ({
         openModal(status) {
             setOpen(status);
@@ -19,7 +22,7 @@ const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", img
     }));
     const [open, setOpen] = (0, react_1.useState)(false);
     const [pictures, setPictures] = (0, react_1.useState)([]);
-    const [fileErrors, setFileErrors] = (0, react_1.useState)(false);
+    const [errors, setErrors] = (0, react_1.useState)([]);
     const [srcCrop, setSrcCrop] = (0, react_1.useState)(false);
     const [openCrop, setOpenCrop] = (0, react_1.useState)(false);
     const [indexCrop, setIndexCrop] = (0, react_1.useState)(false);
@@ -39,8 +42,10 @@ const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", img
         });
     };
     const onFileChange = event => {
+        setErrors([]);
         let allFilePromises = [];
         let fileError = [];
+        let fileErrors = [];
         if (event.target.files) {
             Array.from(event.target.files).map((file) => {
                 if (!hasExtension(file.name)) {
@@ -56,19 +61,21 @@ const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", img
                     fileErrors.push(fileError);
                 }
                 if (fileErrors.length > 0) {
-                    setFileErrors(fileErrors);
-                    return;
+                    setErrors(fileErrors);
+                    return false;
                 }
                 allFilePromises.push(readFile(file));
             });
-            Promise.all(allFilePromises).then(newFilesData => {
-                let files = [];
-                newFilesData.forEach(newFileData => {
-                    newFileData.file.src = newFileData.dataURL;
-                    files.push(newFileData.file);
+            if (fileErrors.length === 0) {
+                Promise.all(allFilePromises).then(newFilesData => {
+                    let files = [];
+                    newFilesData.forEach(newFileData => {
+                        newFileData.file.src = newFileData.dataURL;
+                        files.push(newFileData.file);
+                    });
+                    setPictures(files);
                 });
-                setPictures(files);
-            });
+            }
         }
     };
     const remove = (index) => {
@@ -112,7 +119,7 @@ const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", img
         setOpen(false);
     };
     return (react_1.default.createElement("div", { ref: ref },
-        crop && react_1.default.createElement(crop_1.default, { picture: srcCrop, isOpen: openCrop, setOpenCrop: setOpenCrop, saveCropedPicture: saveCropedPicture, iconSize: iconSize }),
+        crop && react_1.default.createElement(crop_1.default, { picture: srcCrop, isOpen: openCrop, setOpenCrop: setOpenCrop, saveCropedPicture: saveCropedPicture, iconSize: iconSize, aspect: aspect }),
         open &&
             (react_1.default.createElement("div", { className: "modal modal-dialog modal-dialog-centered modal-dialog-scrollable fade " + sizModal + (open ? " show" : ""), tabIndex: "-1", id: "exampleModal" },
                 react_1.default.createElement("div", { className: "modal-dialog" },
@@ -121,12 +128,13 @@ const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", img
                             react_1.default.createElement("h1", { className: "modal-title fs-5", id: "exampleModalLabel" }, title),
                             react_1.default.createElement("button", { type: "button", className: "btn-close", onClick: () => { setOpen(false); setPictures([]); } })),
                         react_1.default.createElement("div", { className: "modal-body" },
+                            errors.length > 0 && (react_1.default.createElement("div", null, errors.map((error, key) => (react_1.default.createElement("div", { className: "alert alert-warning", key: key, role: "alert" }, errorsMessages[error.type]))))),
                             react_1.default.createElement("div", { className: "row justify-content-center mb-5" },
                                 react_1.default.createElement("div", { className: "mb-3", style: { width: "300px" } },
                                     react_1.default.createElement("input", { onChange: onFileChange, className: "form-control", type: "file", id: "formFile", multiple: multiple }))),
                             react_1.default.createElement("div", { className: "row d-flex justify-content-center" }, drag && pictures.length > 0 ? (react_1.default.createElement(DraggableRender, null)) : (react_1.default.createElement(ImagesRender, null)))),
                         react_1.default.createElement("div", { className: "modal-footer" },
-                            react_1.default.createElement("button", { type: "button", onClick: () => { setOpen(false); setPictures([]); }, className: "btn btn-secondary" },
+                            react_1.default.createElement("button", { type: "button", onClick: () => { setOpen(false); setPictures([]); setErrors([]); }, className: "btn btn-secondary" },
                                 react_1.default.createElement(react_fontawesome_1.FontAwesomeIcon, { icon: free_solid_svg_icons_1.faXmark })),
                             react_1.default.createElement("button", { type: "button", className: "btn btn-primary", onClick: sendPictures },
                                 react_1.default.createElement(react_fontawesome_1.FontAwesomeIcon, { icon: free_solid_svg_icons_1.faDownload }))))),

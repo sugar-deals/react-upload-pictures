@@ -6,7 +6,7 @@ const react_easy_crop_1 = tslib_1.__importDefault(require("react-easy-crop"));
 const cropImage_1 = tslib_1.__importDefault(require("./cropImage"));
 const react_fontawesome_1 = require("@fortawesome/react-fontawesome");
 const free_solid_svg_icons_1 = require("@fortawesome/free-solid-svg-icons");
-function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSize }) {
+function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSize, aspect }) {
     const [crop, setCrop] = (0, react_1.useState)({ x: 0, y: 0 });
     const [zoom, setZoom] = (0, react_1.useState)(1);
     const [rotation, setRotation] = (0, react_1.useState)(0);
@@ -39,7 +39,7 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSiz
                     react_1.default.createElement("h1", { className: "modal-title fs-5", id: "staticBackdropLabel" }, "Crop Picture"),
                     react_1.default.createElement("button", { type: "button", className: "btn-close", "data-bs-dismiss": "modal", "aria-label": "Close", onClick: () => setOpenCrop(false) })),
                 react_1.default.createElement("div", { className: "modal-body" },
-                    react_1.default.createElement(react_easy_crop_1.default, { image: picture.src, crop: crop, zoom: zoom, aspect: 4 / 3, onCropChange: setCrop, onCropComplete: onCropComplete, onZoomChange: setZoom, rotation: rotation })),
+                    react_1.default.createElement(react_easy_crop_1.default, { image: picture.src, crop: crop, zoom: zoom, aspect: aspect, onCropChange: setCrop, onCropComplete: onCropComplete, onZoomChange: setZoom, rotation: rotation })),
                 react_1.default.createElement("div", { className: "d-flex align-items-center justify-centent-between" },
                     react_1.default.createElement("input", { type: "range", className: "form-range ms-2", type: "range", value: zoom, min: 1, max: 3, step: 0.1, "aria-labelledby": "Zoom", onChange: (e) => {
                             setZoom(e.target.value);

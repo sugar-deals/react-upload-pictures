@@ -8,7 +8,10 @@ const ERROR = {
     NOT_SUPPORTED_EXTENSION: 'NOT_SUPPORTED_EXTENSION',
     FILESIZE_TOO_LARGE: 'FILESIZE_TOO_LARGE'
 };
-const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = ['.jpg', '.jpeg', '.gif', '.png'], maxFileSize = 5242880, height = "200px", width = "200px", sizModal = "modal-xl", iconSize = "lg", drag = false, crop = false, savePictures, multiple = true, }, ref) => {
+const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = ['.jpg', '.jpeg', '.gif', '.png'], maxFileSize = 5242880, height = "200px", width = "200px", sizModal = "modal-xl", iconSize = "lg", drag = false, crop = false, savePictures, multiple = true, aspect = 4 / 3, errorsMessages = {
+    NOT_SUPPORTED_EXTENSION: 'not supported extension',
+    FILESIZE_TOO_LARGE: 'file size too large'
+} }, ref) => {
     useImperativeHandle(ref, () => ({
         openModal(status) {
             setOpen(status);
@@ -16,7 +19,7 @@ const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = [
     }));
     const [open, setOpen] = useState(false);
     const [pictures, setPictures] = useState([]);
-    const [fileErrors, setFileErrors] = useState(false);
+    const [errors, setErrors] = useState([]);
     const [srcCrop, setSrcCrop] = useState(false);
     const [openCrop, setOpenCrop] = useState(false);
     const [indexCrop, setIndexCrop] = useState(false);
@@ -36,8 +39,10 @@ const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = [
         });
     };
     const onFileChange = event => {
+        setErrors([]);
         let allFilePromises = [];
         let fileError = [];
+        let fileErrors = [];
         if (event.target.files) {
             Array.from(event.target.files).map((file) => {
                 if (!hasExtension(file.name)) {
@@ -53,19 +58,21 @@ const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = [
                     fileErrors.push(fileError);
                 }
                 if (fileErrors.length > 0) {
-                    setFileErrors(fileErrors);
-                    return;
+                    setErrors(fileErrors);
+                    return false;
                 }
                 allFilePromises.push(readFile(file));
             });
-            Promise.all(allFilePromises).then(newFilesData => {
-                let files = [];
-                newFilesData.forEach(newFileData => {
-                    newFileData.file.src = newFileData.dataURL;
-                    files.push(newFileData.file);
+            if (fileErrors.length === 0) {
+                Promise.all(allFilePromises).then(newFilesData => {
+                    let files = [];
+                    newFilesData.forEach(newFileData => {
+                        newFileData.file.src = newFileData.dataURL;
+                        files.push(newFileData.file);
+                    });
+                    setPictures(files);
                 });
-                setPictures(files);
-            });
+            }
         }
     };
     const remove = (index) => {
@@ -109,7 +116,7 @@ const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = [
         setOpen(false);
     };
     return (React.createElement("div", { ref: ref },
-        crop && React.createElement(Crop, { picture: srcCrop, isOpen: openCrop, setOpenCrop: setOpenCrop, saveCropedPicture: saveCropedPicture, iconSize: iconSize }),
+        crop && React.createElement(Crop, { picture: srcCrop, isOpen: openCrop, setOpenCrop: setOpenCrop, saveCropedPicture: saveCropedPicture, iconSize: iconSize, aspect: aspect }),
         open &&
             (React.createElement("div", { className: "modal modal-dialog modal-dialog-centered modal-dialog-scrollable fade " + sizModal + (open ? " show" : ""), tabIndex: "-1", id: "exampleModal" },
                 React.createElement("div", { className: "modal-dialog" },
@@ -118,12 +125,13 @@ const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = [
                             React.createElement("h1", { className: "modal-title fs-5", id: "exampleModalLabel" }, title),
                             React.createElement("button", { type: "button", className: "btn-close", onClick: () => { setOpen(false); setPictures([]); } })),
                         React.createElement("div", { className: "modal-body" },
+                            errors.length > 0 && (React.createElement("div", null, errors.map((error, key) => (React.createElement("div", { className: "alert alert-warning", key: key, role: "alert" }, errorsMessages[error.type]))))),
                             React.createElement("div", { className: "row justify-content-center mb-5" },
                                 React.createElement("div", { className: "mb-3", style: { width: "300px" } },
                                     React.createElement("input", { onChange: onFileChange, className: "form-control", type: "file", id: "formFile", multiple: multiple }))),
                             React.createElement("div", { className: "row d-flex justify-content-center" }, drag && pictures.length > 0 ? (React.createElement(DraggableRender, null)) : (React.createElement(ImagesRender, null)))),
                         React.createElement("div", { className: "modal-footer" },
-                            React.createElement("button", { type: "button", onClick: () => { setOpen(false); setPictures([]); }, className: "btn btn-secondary" },
+                            React.createElement("button", { type: "button", onClick: () => { setOpen(false); setPictures([]); setErrors([]); }, className: "btn btn-secondary" },
                                 React.createElement(FontAwesomeIcon, { icon: faXmark })),
                             React.createElement("button", { type: "button", className: "btn btn-primary", onClick: sendPictures },
                                 React.createElement(FontAwesomeIcon, { icon: faDownload }))))),
