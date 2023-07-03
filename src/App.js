@@ -3,7 +3,6 @@ import UploadPictures from "./package/src/index.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 
-
 function App() {
   const ref = useRef();
 
@@ -25,14 +24,15 @@ function App() {
         isOpen={false}
         imgExtension={['.jpg', '.jpeg', '.gif', '.png']}
         maxFileSize={5242880}
-        height="300px"
+        height="213px"
         width="200px"
         sizModal="modal-xl"
         iconSize="lg"
         drag={true}
         crop={true}
+        instructions= "<ul><li>Preferred size: 750x800</li><li>Aspect ratio 15x16</li><li>Max size: 10MB</li><li>max number: 20</li>"
         savePictures={savePictures}
-        multiple={false}
+        multiple={true}
         aspect= {15/16}
       />
     </div>

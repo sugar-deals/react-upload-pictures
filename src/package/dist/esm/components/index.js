@@ -8,7 +8,7 @@ const ERROR = {
     NOT_SUPPORTED_EXTENSION: 'NOT_SUPPORTED_EXTENSION',
     FILESIZE_TOO_LARGE: 'FILESIZE_TOO_LARGE'
 };
-const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = ['.jpg', '.jpeg', '.gif', '.png'], maxFileSize = 5242880, height = "200px", width = "200px", sizModal = "modal-xl", iconSize = "lg", drag = false, crop = false, savePictures, multiple = true, aspect = 4 / 3, errorsMessages = {
+const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = ['.jpg', '.jpeg', '.gif', '.png'], maxFileSize = 5242880, width = "200px", sizModal = "modal-xl", iconSize = "lg", drag = false, crop = false, savePictures, multiple = true, aspect = 4 / 3, errorsMessages = {
     NOT_SUPPORTED_EXTENSION: 'not supported extension',
     FILESIZE_TOO_LARGE: 'file size too large'
 } }, ref) => {
@@ -87,14 +87,14 @@ const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = [
         setPictures(newList);
     };
     const DraggableRender = useCallback(() => {
-        return (React.createElement(Draggable, { onPosChange: getChangedPos }, pictures && pictures.map((picture, index) => (React.createElement("div", { className: "postion-relative p-0 mx-2", key: index, style: { width: width } },
+        return (React.createElement(Draggable, { onPosChange: getChangedPos }, pictures && pictures.map((picture, index) => (React.createElement("div", { className: "position-relative p-0 mx-2", key: index, style: { width: width } },
             React.createElement(Actions, { index: index, iconSize: iconSize, remove: remove, cropPicture: cropPicture, crop: crop }),
-            React.createElement(Image, { picture: picture, height: height, width: width, className: "mb-4" }))))));
+            React.createElement(Image, { picture: picture, height: width * aspect, width: width, className: "mb-4" }))))));
     }, [pictures]);
     const ImagesRender = useCallback(() => {
-        return (React.createElement("div", { className: "row d-flex justify-content-center" }, pictures && pictures.map((picture, index) => (React.createElement("div", { className: "postion-relative p-0 mx-2", key: index, style: { width: width } },
+        return (React.createElement("div", { className: "row d-flex justify-content-center" }, pictures && pictures.map((picture, index) => (React.createElement("div", { className: "position-relative p-0 mx-2", key: index, style: { width: width } },
             React.createElement(Actions, { index: index, iconSize: iconSize, remove: remove, cropPicture: cropPicture, crop: crop }),
-            React.createElement(Image, { picture: picture, height: height, width: width, className: "mb-4" }))))));
+            React.createElement(Image, { picture: picture, height: width * aspect, width: width, className: "mb-4" }))))));
     }, [pictures]);
     const cropPicture = (index) => {
         let picture = pictures.find((_, i) => i === index);
@@ -102,7 +102,7 @@ const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = [
         setOpenCrop(true);
         setIndexCrop(index);
     };
-    const saveCropedPicture = (picture) => {
+    const saveCroppedPicture = (picture) => {
         setPictures(items => items.map((item, i) => i === indexCrop
             ? picture
             : item));
@@ -116,7 +116,7 @@ const UploadPictures = forwardRef(({ title = "upload pictures", imgExtension = [
         setOpen(false);
     };
     return (React.createElement("div", { ref: ref },
-        crop && React.createElement(Crop, { picture: srcCrop, isOpen: openCrop, setOpenCrop: setOpenCrop, saveCropedPicture: saveCropedPicture, iconSize: iconSize, aspect: aspect }),
+        crop && React.createElement(Crop, { picture: srcCrop, isOpen: openCrop, setOpenCrop: setOpenCrop, saveCroppedPicture: saveCroppedPicture, iconSize: iconSize, aspect: aspect }),
         open &&
             (React.createElement("div", { className: "modal modal-dialog modal-dialog-centered modal-dialog-scrollable fade " + sizModal + (open ? " show" : ""), tabIndex: "-1", id: "exampleModal" },
                 React.createElement("div", { className: "modal-dialog" },

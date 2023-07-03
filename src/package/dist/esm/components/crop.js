@@ -3,7 +3,7 @@ import Cropper from "react-easy-crop";
 import getCroppedImg from "./cropImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload, faRotateRight, faXmark } from "@fortawesome/free-solid-svg-icons";
-function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSize, aspect }) {
+function Crop({ isOpen = false, setOpenCrop, picture, saveCroppedPicture, iconSize, aspect }) {
     const [crop, setCrop] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
     const [rotation, setRotation] = useState(0);
@@ -15,7 +15,7 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSiz
         try {
             const croppedImage = await getCroppedImg(picture.src, croppedAreaPixels, rotation);
             picture.src = await croppedImage;
-            saveCropedPicture(picture);
+            saveCroppedPicture(picture);
             setZoom(1);
             setRotation(0);
         }
@@ -37,7 +37,7 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSiz
                     React.createElement("button", { type: "button", className: "btn-close", "data-bs-dismiss": "modal", "aria-label": "Close", onClick: () => setOpenCrop(false) })),
                 React.createElement("div", { className: "modal-body" },
                     React.createElement(Cropper, { image: picture.src, crop: crop, zoom: zoom, aspect: aspect, onCropChange: setCrop, onCropComplete: onCropComplete, onZoomChange: setZoom, rotation: rotation })),
-                React.createElement("div", { className: "d-flex align-items-center justify-centent-between" },
+                React.createElement("div", { className: "d-flex align-items-center justify-content-between" },
                     React.createElement("input", { type: "range", className: "form-range ms-2", type: "range", value: zoom, min: 1, max: 3, step: 0.1, "aria-labelledby": "Zoom", onChange: (e) => {
                             setZoom(e.target.value);
                         } }),

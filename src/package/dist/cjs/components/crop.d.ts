@@ -1,10 +1,9 @@
 export default Crop;
-declare function Crop({ isOpen, setOpenCrop, picture, saveCropedPicture, iconSize, aspect }: {
+declare function Crop({ isOpen, setOpenCrop, picture, saveCroppedPicture, iconSize, aspect }: {
     isOpen?: boolean | undefined;
     setOpenCrop: any;
     picture: any;
-    saveCropedPicture: any;
+    saveCroppedPicture: any;
     iconSize: any;
     aspect: any;
-}): React.JSX.Element;
-import React from "react";
+}): any;

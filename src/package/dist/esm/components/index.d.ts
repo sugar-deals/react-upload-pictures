@@ -1,3 +1,2 @@
 export default UploadPictures;
-declare const UploadPictures: React.ForwardRefExoticComponent<React.RefAttributes<any>>;
-import React from "react";
+declare const UploadPictures: any;

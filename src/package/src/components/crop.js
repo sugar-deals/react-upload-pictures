@@ -4,7 +4,7 @@ import getCroppedImg from "./cropImage"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faDownload, faRotateRight, faXmark } from "@fortawesome/free-solid-svg-icons"
 
-function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSize, aspect }) {
+function Crop({ isOpen = false, setOpenCrop, picture, saveCroppedPicture, iconSize, aspect }) {
 
     const [crop, setCrop] = useState({ x: 0, y: 0 })
     const [zoom, setZoom] = useState(1)
@@ -24,7 +24,7 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSiz
                 rotation
             )
             picture.src = await croppedImage
-            saveCropedPicture(picture);
+            saveCroppedPicture(picture);
             setZoom(1)
             setRotation(0)
         } catch (e) {
@@ -59,7 +59,7 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCropedPicture, iconSiz
                             rotation={rotation}
                         />
                     </div>
-                    <div className="d-flex align-items-center justify-centent-between">
+                    <div className="d-flex align-items-center justify-content-between">
 
                         <input
                             type="range"

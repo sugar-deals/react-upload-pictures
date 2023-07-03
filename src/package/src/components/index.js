@@ -25,6 +25,7 @@ const UploadPictures = forwardRef((
     savePictures,
     multiple = true,
     aspect = 4 / 3,
+    instructions = null,
     errorsMessages = {
       NOT_SUPPORTED_EXTENSION: 'not supported extension',
       FILESIZE_TOO_LARGE: 'file size too large'
@@ -72,14 +73,16 @@ const UploadPictures = forwardRef((
       Array.from(event.target.files).map((file) => {
         if (!hasExtension(file.name)) {
           fileError = Object.assign(fileError, {
-            type: ERROR.NOT_SUPPORTED_EXTENSION
+            type: ERROR.NOT_SUPPORTED_EXTENSION,
+            filename: file.name
           });
           fileErrors.push(fileError);
         }
 
         if (file.size > maxFileSize) {
           fileError = Object.assign(fileError, {
-            type: ERROR.FILESIZE_TOO_LARGE
+            type: ERROR.FILESIZE_TOO_LARGE,
+            filename: file.name
           });
           fileErrors.push(fileError);
         }
@@ -96,7 +99,8 @@ const UploadPictures = forwardRef((
             newFileData.file.src = newFileData.dataURL
             files.push(newFileData.file);
           });
-          setPictures(files);
+          let oldPictures = pictures;
+          setPictures(oldPictures.concat(files));
         });
       }
     }
@@ -111,7 +115,7 @@ const UploadPictures = forwardRef((
     let index = [];
     let newList = pictures
     let pic = newList.splice(currentPos, 1);
-    newList.splice(newPos - 1, 0, pic[0])
+    newList.splice(newPos - 1, 0, pic[0]);
     setPictures(newList)
   };
 
@@ -121,7 +125,7 @@ const UploadPictures = forwardRef((
       <Draggable onPosChange={getChangedPos}>
         {
           pictures && pictures.map((picture, index) => (
-            <div className="postion-relative p-0 mx-2" key={index} style={{ width: width }}>
+            <div className="position-relative p-0 mx-2" key={index} style={{ width: width, height: height }}>
               <Actions index={index} iconSize={iconSize} remove={remove} cropPicture={cropPicture} crop={crop} />
               <Image picture={picture} height={height} width={width} className="mb-4" />
             </div>
@@ -138,7 +142,7 @@ const UploadPictures = forwardRef((
       <div className="row d-flex justify-content-center">
         {
           pictures && pictures.map((picture, index) => (
-            <div className="postion-relative p-0 mx-2" key={index} style={{ width: width }}>
+            <div className="position-relative p-0 mx-2" key={index} style={{ width: width, height: height }}>
               <Actions index={index} iconSize={iconSize} remove={remove} cropPicture={cropPicture} crop={crop} />
               <Image picture={picture} height={height} width={width} className="mb-4" />
             </div>
@@ -156,7 +160,7 @@ const UploadPictures = forwardRef((
     setIndexCrop(index)
   }
 
-  const saveCropedPicture = (picture) => {
+  const saveCroppedPicture = (picture) => {
     setPictures(items => items.map((item, i) =>
       i === indexCrop
         ? picture
@@ -168,26 +172,27 @@ const UploadPictures = forwardRef((
   }
 
   const sendPictures = () => {
-    savePictures(pictures);
-    setPictures(false)
-    setOpen(false)
-
+    let uploadPicturesPromise = new Promise(resolve => {resolve(savePictures(pictures))});
+    uploadPicturesPromise.then(uploadPicturesResult => {
+        setPictures([]);
+        setOpen(false);
+    });
   }
+
   return (
     <div ref={ref}>
       {
-        crop && <Crop picture={srcCrop} isOpen={openCrop} setOpenCrop={setOpenCrop} saveCropedPicture={saveCropedPicture} iconSize={iconSize} aspect={aspect} />
+        crop && <Crop picture={srcCrop} isOpen={openCrop} setOpenCrop={setOpenCrop} saveCroppedPicture={saveCroppedPicture} iconSize={iconSize} aspect={aspect} />
       }
 
       {
         open &&
         (
           <div className={"modal modal-dialog modal-dialog-centered modal-dialog-scrollable fade " + sizModal + (open ? " show" : "")} tabIndex="-1" id="exampleModal">
-            <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
                   <h1 className="modal-title fs-5" id="exampleModalLabel">{title}</h1>
-                  <button type="button" className="btn-close" onClick={() => { setOpen(false); setPictures([]); }}></button>
+                  <button type="button" className="btn-close" onClick={() => { setOpen(false); setPictures([]); setErrors([]);}}></button>
                 </div>
                 <div className="modal-body">
                   {
@@ -196,18 +201,34 @@ const UploadPictures = forwardRef((
                         {
                           errors.map((error, key) => (
                             <div className="alert alert-warning" key={key} role="alert">
-                              {errorsMessages[error.type]}
+                              {error.filename} : {errorsMessages[error.type]}
                             </div>
                           ))
                         }
                       </div>
                     )
                   }
-                  <div className="row justify-content-center mb-5">
-                    <div className="mb-3" style={{ width: "300px" }}>
-                      <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={multiple} />
+                  {
+                    drag && pictures.length === 0 && instructions &&
+                        <div className="mb-2">
+                            <div className="alert alert-info" role="alert">
+                              {instructions}
+                            </div>
+                        </div>
+                  }
+                  <div className="row justify-content-center mb-2">
+                    <div className="mb-3" style={{ width: "auto" }}>
+                      <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={true} />
                     </div>
                   </div>
+                  {
+                    drag && pictures.length > 1 &&
+                        <div className="mb-2">
+                            <div className="alert alert-info" role="alert">
+                              You can drag the pictures to rearrange their order.
+                            </div>
+                        </div>
+                  }
                   <div className="row d-flex justify-content-center">
                     {
                       drag && pictures.length > 0 ? (
@@ -220,14 +241,13 @@ const UploadPictures = forwardRef((
                 </div>
                 <div className="modal-footer">
                   <button type="button" onClick={() => { setOpen(false); setPictures([]); setErrors([]); }} className="btn btn-secondary">
-                    <FontAwesomeIcon icon={faXmark} />
+                    Close
                   </button>
                   <button type="button" className="btn btn-primary" onClick={sendPictures}>
-                    <FontAwesomeIcon icon={faDownload} />
+                    Upload
                   </button>
                 </div>
               </div>
-            </div>
             {
               crop && <div className={(openCrop ? "modal-backdrop fade show" : "")}></div>
             }

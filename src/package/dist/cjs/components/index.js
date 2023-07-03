@@ -11,7 +11,7 @@ const ERROR = {
     NOT_SUPPORTED_EXTENSION: 'NOT_SUPPORTED_EXTENSION',
     FILESIZE_TOO_LARGE: 'FILESIZE_TOO_LARGE'
 };
-const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", imgExtension = ['.jpg', '.jpeg', '.gif', '.png'], maxFileSize = 5242880, height = "200px", width = "200px", sizModal = "modal-xl", iconSize = "lg", drag = false, crop = false, savePictures, multiple = true, aspect = 4 / 3, errorsMessages = {
+const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", imgExtension = ['.jpg', '.jpeg', '.gif', '.png'], maxFileSize = 5242880, width = "200px", sizModal = "modal-xl", iconSize = "lg", drag = false, crop = false, savePictures, multiple = true, aspect = 4 / 3, errorsMessages = {
     NOT_SUPPORTED_EXTENSION: 'not supported extension',
     FILESIZE_TOO_LARGE: 'file size too large'
 } }, ref) => {
@@ -90,14 +90,14 @@ const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", img
         setPictures(newList);
     };
     const DraggableRender = (0, react_1.useCallback)(() => {
-        return (react_1.default.createElement(react_drag_reorder_1.Draggable, { onPosChange: getChangedPos }, pictures && pictures.map((picture, index) => (react_1.default.createElement("div", { className: "postion-relative p-0 mx-2", key: index, style: { width: width } },
+        return (react_1.default.createElement(react_drag_reorder_1.Draggable, { onPosChange: getChangedPos }, pictures && pictures.map((picture, index) => (react_1.default.createElement("div", { className: "position-relative p-0 mx-2", key: index, style: { width: width } },
             react_1.default.createElement(Actions, { index: index, iconSize: iconSize, remove: remove, cropPicture: cropPicture, crop: crop }),
-            react_1.default.createElement(Image, { picture: picture, height: height, width: width, className: "mb-4" }))))));
+            react_1.default.createElement(Image, { picture: picture, height: width * aspect, width: width, className: "mb-4" }))))));
     }, [pictures]);
     const ImagesRender = (0, react_1.useCallback)(() => {
-        return (react_1.default.createElement("div", { className: "row d-flex justify-content-center" }, pictures && pictures.map((picture, index) => (react_1.default.createElement("div", { className: "postion-relative p-0 mx-2", key: index, style: { width: width } },
+        return (react_1.default.createElement("div", { className: "row d-flex justify-content-center" }, pictures && pictures.map((picture, index) => (react_1.default.createElement("div", { className: "position-relative p-0 mx-2", key: index, style: { width: width } },
             react_1.default.createElement(Actions, { index: index, iconSize: iconSize, remove: remove, cropPicture: cropPicture, crop: crop }),
-            react_1.default.createElement(Image, { picture: picture, height: height, width: width, className: "mb-4" }))))));
+            react_1.default.createElement(Image, { picture: picture, height: width * aspect, width: width, className: "mb-4" }))))));
     }, [pictures]);
     const cropPicture = (index) => {
         let picture = pictures.find((_, i) => i === index);
@@ -105,7 +105,7 @@ const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", img
         setOpenCrop(true);
         setIndexCrop(index);
     };
-    const saveCropedPicture = (picture) => {
+    const saveCroppedPicture = (picture) => {
         setPictures(items => items.map((item, i) => i === indexCrop
             ? picture
             : item));
@@ -119,7 +119,7 @@ const UploadPictures = (0, react_1.forwardRef)(({ title = "upload pictures", img
         setOpen(false);
     };
     return (react_1.default.createElement("div", { ref: ref },
-        crop && react_1.default.createElement(crop_1.default, { picture: srcCrop, isOpen: openCrop, setOpenCrop: setOpenCrop, saveCropedPicture: saveCropedPicture, iconSize: iconSize, aspect: aspect }),
+        crop && react_1.default.createElement(crop_1.default, { picture: srcCrop, isOpen: openCrop, setOpenCrop: setOpenCrop, saveCroppedPicture: saveCroppedPicture, iconSize: iconSize, aspect: aspect }),
         open &&
             (react_1.default.createElement("div", { className: "modal modal-dialog modal-dialog-centered modal-dialog-scrollable fade " + sizModal + (open ? " show" : ""), tabIndex: "-1", id: "exampleModal" },
                 react_1.default.createElement("div", { className: "modal-dialog" },
