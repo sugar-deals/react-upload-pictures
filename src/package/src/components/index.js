@@ -1,8 +1,8 @@
-import React, { useCallback, useState, forwardRef, useImperativeHandle } from "react"
+import React, { useCallback, useState, forwardRef } from "react"
 
 import "../assets/style/index.scss"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCropSimple, faDownload, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faCropSimple, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Draggable } from "react-drag-reorder";
 import Crop from "./crop";
 
@@ -43,8 +43,6 @@ const UploadPictures = forwardRef((
   ref
 ) => {
 
-  useImperativeHandle(ref, () => ({
-  }));
   const [pictures, setPictures] = useState([])
   const [errors, setErrors] = useState([])
   const [srcCrop, setSrcCrop] = useState(false)
