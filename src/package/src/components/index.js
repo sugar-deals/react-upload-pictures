@@ -191,7 +191,6 @@ const UploadPictures = forwardRef((
     setSrcCrop(false)
     setOpenCrop(false)
     setIndexCrop(false)
-    console.log(picture);
     let listerrors = errors;
     listerrors = listerrors.filter(err => err.filename !== picture.name)
     setErrors(listerrors);
