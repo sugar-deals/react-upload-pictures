@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react"
+import React, { useRef, useState } from "react";
+import { Button, Modal } from 'react-bootstrap';
 import UploadPictures from "./package/src/index.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
@@ -10,7 +11,7 @@ function App() {
 
   const savePictures = (pictures) => {
     console.log(pictures);
-    setOpen(false)
+    setOpen(false);
   }
   return (
     <div className="App">
@@ -20,30 +21,41 @@ function App() {
 
       {
         open && (
-          <div className="modal modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable fade show" tabIndex="-1" id="exampleModalLive">
-            <div className="modal-dialog">
-              <div className="modal-content p-2">
-                <UploadPictures
-                  ref={ref}
-                  title="upload pictures"
-                  isOpen={false}
-                  imgExtension={['.jpg', '.jpeg', '.gif', '.png']}
-                  maxFileSize={5242880}
-                  height="100px"
-                  width="100px"
-                  sizModal="modal-xl"
-                  iconSize="lg"
-                  drag={true}
-                  crop={true}
-                  instructions="<ul><li>Preferred size: 750x800</li><li>Aspect ratio 15x16</li><li>Max size: 10MB</li><li>max number: 20</li>"
-                  savePictures={savePictures}
-                  multiple={true}
-                  aspect={15 / 16}
-                  handelClose= { () => setOpen(false)}
-                />
-              </div>
-            </div>
-          </div>
+             <Modal
+                show={open}
+                onHide={()=>setOpen(false)}
+                size="xl"
+                keyboard={true}>
+                <Modal.Header closeButton>
+                  <Modal.Title>Upload Images</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <UploadPictures
+                      ref={ref}
+                      isOpen={false}
+                      imgExtension={['.jpg', '.jpeg', '.gif', '.png']}
+                      maxFileSize={5242880}
+                      height="100px"
+                      width="100px"
+                      iconSize="lg"
+                      drag={true}
+                      crop={true}
+                      instructions="<ul><li>Preferred size: 750x800</li><li>Aspect ratio 15x16</li><li>Max size: 10MB</li><li>max number: 20</li>"
+                      savePictures={savePictures}
+                      multiple={true}
+                      aspect={15 / 16}
+                      handelClose= { () => setOpen(false)}
+                    />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setOpen(false)}>
+                        Close
+                    </Button>
+                    <Button variant="primary" className="text-white" onClick={() => setOpen(false)}>
+                        Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         )
       }
       {

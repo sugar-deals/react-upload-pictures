@@ -64,7 +64,6 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCroppedPicture, iconSi
                         <input
                             type="range"
                             className="form-range ms-2"
-                            type="range"
                             value={zoom}
                             min={1}
                             max={3}

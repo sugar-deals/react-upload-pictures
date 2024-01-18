@@ -14,7 +14,7 @@ const ERROR = {
 
 const UploadPictures = forwardRef((
   {
-    title = "upload pictures",
+    title = null,
     imgExtension = ['.jpg', '.jpeg', '.gif', '.png'],
     maxFileSize = 5242880,
     height = "200px",
@@ -27,8 +27,6 @@ const UploadPictures = forwardRef((
     multiple = true,
     aspect = 4 / 3,
     instructions = null,
-    imageWidth = 300,
-    imageHeight = 300,
     buttonNames = {
         'CLOSE' : 'Close',
         'UPLOAD': 'Upload'
@@ -38,7 +36,7 @@ const UploadPictures = forwardRef((
       FILESIZE_TOO_LARGE: 'file size too large',
       DIMENSION_IMAGE: "please crop the image"
     },
-    handelClose =  () => {}
+    handleClose =  () => {}
   },
   ref
 ) => {
@@ -104,15 +102,16 @@ const UploadPictures = forwardRef((
             image.src = newFileData.file.src;
             image.addEventListener('load', () => {
               const { width, height } = image;
-              // set image width and height to your state here
-              if (width > imageWidth || height > imageHeight) {
+              // check aspect ratio of the image
+              debugger;
+              if (aspect !== (width/height)) {
                 fileErrors.push(
                   {
                     type: ERROR.DIMENSION_IMAGE,
                     filename: newFileData.file.name
                   }
                 );
-                if (errors.lenth > 0) {
+                if (errors.length > 0) {
                   setErrors([...errors, ...fileErrors])
                 }
                 else {
@@ -192,6 +191,7 @@ const UploadPictures = forwardRef((
     setSrcCrop(false)
     setOpenCrop(false)
     setIndexCrop(false)
+    setErrors([]);
   }
 
   const sendPictures = () => {
@@ -210,9 +210,11 @@ const UploadPictures = forwardRef((
       {
         <div className={classStyle}>
           <div className="upload-content">
-            <div className="upload-header">
-              <h1 className="upload-title fs-5">{title}</h1>
-            </div>
+            {title !== null ?
+                <div className="upload-header">
+                  <h1 className="upload-title fs-5">{title}</h1>
+                </div>
+            : ""}
             <div className="mb-5 upload-body">
               {
                 errors.length > 0 && (
@@ -230,8 +232,7 @@ const UploadPictures = forwardRef((
               {
                 drag && pictures.length === 0 && instructions &&
                 <div className="mb-2">
-                  <div className="alert alert-info" role="alert">
-                    {instructions}
+                  <div className="alert alert-info" role="alert" dangerouslySetInnerHTML={{__html: instructions}}>
                   </div>
                 </div>
               }
@@ -258,14 +259,7 @@ const UploadPictures = forwardRef((
                 }
               </div>
             </div>
-            <div className="d-flex justify-content-end upload-footer">
-              <button type="button" onClick={() => { setPictures([]); setErrors([]); handelClose() }} className="btn btn-secondary me-3">
-                {buttonNames['CLOSE']}
-              </button>
-              <button type="button" disabled={pictures.length === 0 || errors.length > 0} className="btn btn-primary" onClick={sendPictures}>
-                {buttonNames['UPLOAD']}
-              </button>
-            </div>
+
           </div>
           {
             crop && <div className={(openCrop ? "modal-backdrop fade show" : "")}></div>
