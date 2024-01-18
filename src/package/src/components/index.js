@@ -19,7 +19,7 @@ const UploadPictures = forwardRef((
     maxFileSize = 5242880,
     height = "200px",
     width = "200px",
-    sizModal = "modal-xl",
+    classStyle = "",
     iconSize = "lg",
     drag = false,
     crop = false,
@@ -39,11 +39,7 @@ const UploadPictures = forwardRef((
 ) => {
 
   useImperativeHandle(ref, () => ({
-    openModal(status) {
-      setOpen(status)
-    }
   }));
-  const [open, setOpen] = useState(false)
   const [pictures, setPictures] = useState([])
   const [errors, setErrors] = useState([])
   const [srcCrop, setSrcCrop] = useState(false)
@@ -199,7 +195,6 @@ const UploadPictures = forwardRef((
     let uploadPicturesPromise = new Promise(resolve => { resolve(savePictures(pictures)) });
     uploadPicturesPromise.then(uploadPicturesResult => {
       setPictures([]);
-      setOpen(false);
     });
   }
 
@@ -210,75 +205,70 @@ const UploadPictures = forwardRef((
       }
 
       {
-        open &&
-        (
-          <div className={"modal modal-dialog modal-dialog-centered modal-dialog-scrollable fade " + sizModal + (open ? " show" : "")} tabIndex="-1" id="exampleModal">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h1 className="modal-title fs-5" id="exampleModalLabel">{title}</h1>
-                <button type="button" className="btn-close" onClick={() => { setOpen(false); setPictures([]); setErrors([]); }}></button>
+        <div className={classStyle}>
+          <div className="upload-content">
+            <div className="upload-header">
+              <h1 className="upload-title fs-5">{title}</h1>
+            </div>
+            <div className="upload-body">
+              {
+                errors.length > 0 && (
+                  <div>
+                    {
+                      errors.map((error, key) => (
+                        <div className="alert alert-warning" key={key} role="alert">
+                          {error.filename} : {errorsMessages[error.type]}
+                        </div>
+                      ))
+                    }
+                  </div>
+                )
+              }
+              {
+                drag && pictures.length === 0 && instructions &&
+                <div className="mb-2">
+                  <div className="alert alert-info" role="alert">
+                    {instructions}
+                  </div>
+                </div>
+              }
+              <div className="row justify-content-center mb-2">
+                <div className="mb-3" style={{ width: "auto" }}>
+                  <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={true} />
+                </div>
               </div>
-              <div className="modal-body">
+              {
+                drag && pictures.length > 1 &&
+                <div className="mb-2">
+                  <div className="alert alert-info" role="alert">
+                    You can drag the pictures to rearrange their order.
+                  </div>
+                </div>
+              }
+              <div className="row d-flex justify-content-center">
                 {
-                  errors.length > 0 && (
-                    <div>
-                      {
-                        errors.map((error, key) => (
-                          <div className="alert alert-warning" key={key} role="alert">
-                            {error.filename} : {errorsMessages[error.type]}
-                          </div>
-                        ))
-                      }
-                    </div>
+                  drag && pictures.length > 0 ? (
+                    <DraggableRender />
+                  ) : (
+                    <ImagesRender />
                   )
                 }
-                {
-                  drag && pictures.length === 0 && instructions &&
-                  <div className="mb-2">
-                    <div className="alert alert-info" role="alert">
-                      {instructions}
-                    </div>
-                  </div>
-                }
-                <div className="row justify-content-center mb-2">
-                  <div className="mb-3" style={{ width: "auto" }}>
-                    <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={true} />
-                  </div>
-                </div>
-                {
-                  drag && pictures.length > 1 &&
-                  <div className="mb-2">
-                    <div className="alert alert-info" role="alert">
-                      You can drag the pictures to rearrange their order.
-                    </div>
-                  </div>
-                }
-                <div className="row d-flex justify-content-center">
-                  {
-                    drag && pictures.length > 0 ? (
-                      <DraggableRender />
-                    ) : (
-                      <ImagesRender />
-                    )
-                  }
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" onClick={() => { setOpen(false); setPictures([]); setErrors([]); }} className="btn btn-secondary">
-                  Close
-                </button>
-                <button type="button" disabled={pictures.length === 0 || errors.length > 0} className="btn btn-primary" onClick={sendPictures}>
-                  Upload
-                </button>
               </div>
             </div>
-            {
-              crop && <div className={(openCrop ? "modal-backdrop fade show" : "")}></div>
-            }
+            <div className="d-flex justify-content-end upload-footer">
+              <button type="button" onClick={() => { setPictures([]); setErrors([]); }} className="btn btn-secondary me-3">
+                Close
+              </button>
+              <button type="button" disabled={pictures.length === 0 || errors.length > 0} className="btn btn-primary" onClick={sendPictures}>
+                Upload
+              </button>
+            </div>
           </div>
-        )
+          {
+            crop && <div className={(openCrop ? "modal-backdrop fade show" : "")}></div>
+          }
+        </div>
       }
-      <div className={(open ? "modal-backdrop fade show" : "")}></div>
     </div>
   )
 })
