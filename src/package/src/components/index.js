@@ -33,7 +33,8 @@ const UploadPictures = forwardRef((
       NOT_SUPPORTED_EXTENSION: 'not supported extension',
       FILESIZE_TOO_LARGE: 'file size too large',
       DIMENSION_IMAGE: "please crop the image"
-    }
+    },
+    handelClose =  () => {}
   },
   ref
 ) => {
@@ -45,7 +46,7 @@ const UploadPictures = forwardRef((
   const [srcCrop, setSrcCrop] = useState(false)
   const [openCrop, setOpenCrop] = useState(false)
   const [indexCrop, setIndexCrop] = useState(false)
-
+  
   const hasExtension = (fileName) => {
     const pattern = '(' + imgExtension.join('|').replace(/\./g, '\\.') + ')$';
     return new RegExp(pattern, 'i').test(fileName);
@@ -210,7 +211,7 @@ const UploadPictures = forwardRef((
             <div className="upload-header">
               <h1 className="upload-title fs-5">{title}</h1>
             </div>
-            <div className="upload-body">
+            <div className="mb-5 upload-body">
               {
                 errors.length > 0 && (
                   <div>
@@ -256,7 +257,7 @@ const UploadPictures = forwardRef((
               </div>
             </div>
             <div className="d-flex justify-content-end upload-footer">
-              <button type="button" onClick={() => { setPictures([]); setErrors([]); }} className="btn btn-secondary me-3">
+              <button type="button" onClick={() => { setPictures([]); setErrors([]); handelClose() }} className="btn btn-secondary me-3">
                 Close
               </button>
               <button type="button" disabled={pictures.length === 0 || errors.length > 0} className="btn btn-primary" onClick={sendPictures}>

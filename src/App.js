@@ -29,8 +29,8 @@ function App() {
                   isOpen={false}
                   imgExtension={['.jpg', '.jpeg', '.gif', '.png']}
                   maxFileSize={5242880}
-                  height="213px"
-                  width="200px"
+                  height="100px"
+                  width="100px"
                   sizModal="modal-xl"
                   iconSize="lg"
                   drag={true}
@@ -39,6 +39,7 @@ function App() {
                   savePictures={savePictures}
                   multiple={true}
                   aspect={15 / 16}
+                  handelClose= { () => setOpen(false)}
                 />
               </div>
             </div>
