@@ -1,13 +1,13 @@
 {
-  "name": "react-upload-pictures",
-  "version": "0.7.0",
+  "name": "react-crop-upload-pictures",
+  "version": "0.9.0",
   "description": "upload pictures with crop and drag",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git@github.com:imadghssisse/react-upload-pictures.git"
+    "url": "git@github.com:sugar-deals/react-upload-pictures.git"
   },
   "scripts": {
     "build": "yarn clean && yarn build:esm && yarn copy-files && yarn build:cjs",
