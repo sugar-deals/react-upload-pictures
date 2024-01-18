@@ -29,6 +29,10 @@ const UploadPictures = forwardRef((
     instructions = null,
     imageWidth = 300,
     imageHeight = 300,
+    buttonNames = {
+        'CLOSE' : 'Close',
+        'UPLOAD': 'Upload'
+    },
     errorsMessages = {
       NOT_SUPPORTED_EXTENSION: 'not supported extension',
       FILESIZE_TOO_LARGE: 'file size too large',
@@ -46,7 +50,7 @@ const UploadPictures = forwardRef((
   const [srcCrop, setSrcCrop] = useState(false)
   const [openCrop, setOpenCrop] = useState(false)
   const [indexCrop, setIndexCrop] = useState(false)
-  
+
   const hasExtension = (fileName) => {
     const pattern = '(' + imgExtension.join('|').replace(/\./g, '\\.') + ')$';
     return new RegExp(pattern, 'i').test(fileName);
@@ -258,10 +262,10 @@ const UploadPictures = forwardRef((
             </div>
             <div className="d-flex justify-content-end upload-footer">
               <button type="button" onClick={() => { setPictures([]); setErrors([]); handelClose() }} className="btn btn-secondary me-3">
-                Close
+                {buttonNames['CLOSE']}
               </button>
               <button type="button" disabled={pictures.length === 0 || errors.length > 0} className="btn btn-primary" onClick={sendPictures}>
-                Upload
+                {buttonNames['UPLOAD']}
               </button>
             </div>
           </div>

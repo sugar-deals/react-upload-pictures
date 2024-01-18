@@ -12,7 +12,7 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCroppedPicture, iconSi
     const [croppedAreaPixels, setCroppedAreaPixels] = useState(1)
 
     const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
-        setCroppedAreaPixels(croppedAreaPixels)
+        setCroppedAreaPixels(croppedAreaPixels);
     }, [])
 
 
