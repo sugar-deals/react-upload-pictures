@@ -8,8 +8,18 @@ function App() {
   const ref = useRef();
   const [open, setOpen] = useState(false)
 
+  const submitForm = () => {
+  debugger;
+    ref.current.sendPictures();
+
+  }
+
 
   const savePictures = (pictures) => {
+
+    //make a POST with pictures and other parameters
+
+
     console.log(pictures);
     setOpen(false);
   }
@@ -51,7 +61,7 @@ function App() {
                     <Button variant="secondary" onClick={() => setOpen(false)}>
                         Close
                     </Button>
-                    <Button variant="primary" className="text-white" onClick={() => setOpen(false)}>
+                    <Button variant="primary" className="text-white" onClick={() => submitForm()}>
                         Save
                     </Button>
                 </Modal.Footer>

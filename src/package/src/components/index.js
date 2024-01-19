@@ -1,4 +1,4 @@
-import React, { useCallback, useState, forwardRef } from "react"
+import React, { useCallback, useState, forwardRef, useImperativeHandle } from "react"
 
 import "../assets/style/index.scss"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -27,10 +27,6 @@ const UploadPictures = forwardRef((
     multiple = true,
     aspect = 4 / 3,
     instructions = null,
-    buttonNames = {
-        'CLOSE' : 'Close',
-        'UPLOAD': 'Upload'
-    },
     errorsMessages = {
       NOT_SUPPORTED_EXTENSION: 'not supported extension',
       FILESIZE_TOO_LARGE: 'file size too large',
@@ -40,7 +36,17 @@ const UploadPictures = forwardRef((
   },
   ref
 ) => {
-
+  useImperativeHandle(ref, () => ({
+    sendPictures() {
+      sendPictures();
+    },
+    getErrors() {
+      return errors;
+    },
+    getPictures() {
+      return pictures;
+    }
+  }));
   const [pictures, setPictures] = useState([])
   const [errors, setErrors] = useState([])
   const [srcCrop, setSrcCrop] = useState(false)
