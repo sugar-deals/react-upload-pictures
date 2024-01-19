@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react"
 import Cropper from "react-easy-crop"
 import getCroppedImg from "./cropImage"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faDownload, faRotateRight, faXmark } from "@fortawesome/free-solid-svg-icons"
+import { faFloppyDisk, faRotateRight, faXmark } from "@fortawesome/free-solid-svg-icons"
 
 function Crop({ isOpen = false, setOpenCrop, picture, saveCroppedPicture, iconSize, aspect }) {
 
@@ -41,7 +41,8 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCroppedPicture, iconSi
             <div className="modal-dialog">
                 <div className="modal-content" style={{
                     width: "500px",
-                    height: "500px"
+                    height: "500px",
+                    position:"fixed", left: "calc(50% - 250px)", top: "calc(50% - 250px)"
                 }}>
                     <div className="modal-header">
                         <h1 className="modal-title fs-5" id="staticBackdropLabel">Crop Picture</h1>
@@ -85,7 +86,7 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCroppedPicture, iconSi
                             <FontAwesomeIcon icon={faXmark} />
                         </button>
                         <button type="button" className="btn btn-primary" onClick={() => showCroppedImage()}>
-                            <FontAwesomeIcon icon={faDownload} />
+                            <FontAwesomeIcon icon={faFloppyDisk} />
                         </button>
                     </div>
                 </div>

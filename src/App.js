@@ -9,7 +9,6 @@ function App() {
   const [open, setOpen] = useState(false)
 
   const submitForm = () => {
-  debugger;
     ref.current.sendPictures();
 
   }

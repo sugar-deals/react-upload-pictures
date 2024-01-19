@@ -23,9 +23,9 @@ const UploadPictures = forwardRef((
     iconSize = "lg",
     drag = false,
     crop = false,
-    savePictures,
     multiple = true,
     aspect = 4 / 3,
+    dragDescription = "You can drag pictures to rearrange their order",
     instructions = null,
     errorsMessages = {
       NOT_SUPPORTED_EXTENSION: 'not supported extension',
@@ -37,9 +37,6 @@ const UploadPictures = forwardRef((
   ref
 ) => {
   useImperativeHandle(ref, () => ({
-    sendPictures() {
-      sendPictures();
-    },
     getErrors() {
       return errors;
     },
@@ -102,17 +99,18 @@ const UploadPictures = forwardRef((
       if (fileErrors.length === 0) {
         Promise.all(allFilePromises).then(newFilesData => {
           let files = []
-          newFilesData.forEach(newFileData => {
+          newFilesData.forEach((newFileData,index) => {
             newFileData.file.src = newFileData.dataURL
             var image = new Image();
             image.src = newFileData.file.src;
             image.addEventListener('load', () => {
               const { width, height } = image;
               // check aspect ratio of the image
-              debugger;
               if (aspect !== (width/height)) {
+                newFileData.file.needsCropping = true;
                 fileErrors.push(
                   {
+                    index: index,
                     type: ERROR.DIMENSION_IMAGE,
                     filename: newFileData.file.name
                   }
@@ -135,6 +133,10 @@ const UploadPictures = forwardRef((
   };
 
   const remove = (index) => {
+    let listerrors = errors;
+    listerrors = listerrors.filter(err => err.filename !== pictures[index].name)
+    setErrors(listerrors);
+
     let newList = pictures.filter((_, i) => i !== index);
     setPictures(newList);
   }
@@ -153,7 +155,7 @@ const UploadPictures = forwardRef((
       <Draggable onPosChange={getChangedPos}>
         {
           pictures && pictures.map((picture, index) => (
-            <div className="position-relative p-0 mx-2" key={index} style={{ width: width, height: height }}>
+            <div className={`${picture.needsCropping ? "border border-warning" :""} position-relative p-0 mx-2`} key={index} style={{ width: width }}>
               <Actions index={index} iconSize={iconSize} remove={remove} cropPicture={cropPicture} crop={crop} />
               <ImageDisplay picture={picture} height={height} width={width} className="mb-4" />
             </div>
@@ -197,23 +199,19 @@ const UploadPictures = forwardRef((
     setSrcCrop(false)
     setOpenCrop(false)
     setIndexCrop(false)
+    picture.needsCropping = false;
     let listerrors = errors;
     listerrors = listerrors.filter(err => err.filename !== picture.name)
     setErrors(listerrors);
   }
 
-  const sendPictures = () => {
-    let uploadPicturesPromise = new Promise(resolve => { resolve(savePictures(pictures)) });
-    uploadPicturesPromise.then(uploadPicturesResult => {
-      setPictures([]);
-    });
-  }
-
   return (
-    <div ref={ref}>
+  <>
       {
         crop && <Crop picture={srcCrop} isOpen={openCrop} setOpenCrop={setOpenCrop} saveCroppedPicture={saveCroppedPicture} iconSize={iconSize} aspect={aspect} />
       }
+    <div ref={ref}>
+
 
       {
         <div className={classStyle}>
@@ -230,7 +228,7 @@ const UploadPictures = forwardRef((
                     {
                       errors.map((error, key) => (
                         <div className="alert alert-warning" key={key} role="alert">
-                          {error.filename} : {errorsMessages[error.type]}
+                          [{error.index}]: {error.filename} : {errorsMessages[error.type]}
                         </div>
                       ))
                     }
@@ -253,7 +251,7 @@ const UploadPictures = forwardRef((
                 drag && pictures.length > 1 &&
                 <div className="mb-2">
                   <div className="alert alert-info" role="alert">
-                    You can drag the pictures to rearrange their order.
+                    {dragDescription}
                   </div>
                 </div>
               }
@@ -275,6 +273,7 @@ const UploadPictures = forwardRef((
         </div>
       }
     </div>
+    </>
   )
 })
 
@@ -297,9 +296,10 @@ function Actions({
   return (
     <div className="d-flex w-100 justify-content-between p-0 pb-3" >
       {
-        crop && <FontAwesomeIcon role="button" onClick={() => cropPicture(index)} icon={faCropSimple} size={iconSize} />
+        crop && <FontAwesomeIcon role="button" onClick={() => cropPicture(index)} icon={faCropSimple} size={iconSize} className="my-auto"/>
       }
-      <FontAwesomeIcon role="button" onClick={() => remove(index)} icon={faXmark} size={iconSize} />
+      <b className="fs-5 my-auto">[{index}]</b>
+      <FontAwesomeIcon role="button" onClick={() => remove(index)} icon={faXmark} size={iconSize} className="my-auto" />
     </div>
   )
 }
