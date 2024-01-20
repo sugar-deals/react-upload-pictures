@@ -6,14 +6,19 @@ import { faFloppyDisk, faRotateRight, faXmark } from "@fortawesome/free-solid-sv
 
 function Crop({ isOpen = false, setOpenCrop, picture, saveCroppedPicture, iconSize, aspect }) {
 
-    const [crop, setCrop] = useState({ x: 0, y: 0 })
-    const [zoom, setZoom] = useState(1)
-    const [rotation, setRotation] = useState(0)
-    const [croppedAreaPixels, setCroppedAreaPixels] = useState(1)
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [rotation, setRotation] = useState(0);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(1);
+
+    const onRotationChange = useCallback((rotation) => {
+        console.log(rotation);
+        //setRotation();
+    }, []);
 
     const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
         setCroppedAreaPixels(croppedAreaPixels);
-    }, [])
+    }, []);
 
 
     const showCroppedImage = async () => {
@@ -55,6 +60,7 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCroppedPicture, iconSi
                             zoom={zoom}
                             aspect={aspect}
                             onCropChange={setCrop}
+                            onRotationChange={onRotationChange}
                             onCropComplete={onCropComplete}
                             onZoomChange={setZoom}
                             rotation={rotation}

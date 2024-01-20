@@ -244,7 +244,7 @@ const UploadPictures = forwardRef((
               }
               <div className="row justify-content-center mb-2">
                 <div className="mb-3" style={{ width: "auto" }}>
-                  <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={true} />
+                  <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={multiple} />
                 </div>
               </div>
               {
