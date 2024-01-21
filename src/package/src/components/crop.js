@@ -12,7 +12,6 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCroppedPicture, iconSi
     const [croppedAreaPixels, setCroppedAreaPixels] = useState(1);
 
     const onRotationChange = useCallback((rotation) => {
-        console.log(rotation);
         //setRotation();
     }, []);
 

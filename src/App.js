@@ -9,8 +9,8 @@ function App() {
   const [open, setOpen] = useState(false)
 
   const submitForm = () => {
-    ref.current.sendPictures();
-
+    let pic = ref.current.getPictures();
+    console.log(pic);
   }
 
 
