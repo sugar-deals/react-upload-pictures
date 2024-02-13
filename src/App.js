@@ -15,11 +15,7 @@ function App() {
 
 
   const savePictures = (pictures) => {
-
     //make a POST with pictures and other parameters
-
-
-    console.log(pictures);
     setOpen(false);
   }
   return (

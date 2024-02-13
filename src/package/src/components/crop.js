@@ -43,10 +43,10 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCroppedPicture, iconSi
     return (
         <div className="modal modal-dialog modal-dialog-centered modal-dialog-scrollable fade modal-xl show" style={{ zIndex: 100000 }}>
             <div className="modal-dialog">
-                <div className="modal-content" style={{
-                    width: "500px",
+                <div className="modal-content modal-crop-content" style={{
+                    "max-width": "500px",
                     height: "500px",
-                    position:"fixed", left: "calc(50% - 250px)", top: "calc(50% - 250px)"
+                    position:"fixed", left: "50%", top: "calc(50% - 250px)", transform: "translateX(-50%)"
                 }}>
                     <div className="modal-header">
                         <h1 className="modal-title fs-5" id="staticBackdropLabel">Crop Picture</h1>
