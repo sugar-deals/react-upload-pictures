@@ -8,7 +8,7 @@ import Crop from "./crop";
 
 const ERROR = {
   NOT_SUPPORTED_EXTENSION: 'NOT_SUPPORTED_EXTENSION',
-  FILESIZE_TOO_LARGE: 'FILESIZE_TOO_LARGE',
+  FILE_SIZE_TOO_LARGE: 'FILE_SIZE_TOO_LARGE',
   DIMENSION_IMAGE: "DIMENSION_IMAGE"
 }
 
@@ -27,9 +27,9 @@ const UploadPictures = forwardRef((
     aspect = 4 / 3,
     dragDescription = "You can drag pictures to rearrange their order",
     instructions = null,
-    errorsMessages = {
+    errorMessages = {
       NOT_SUPPORTED_EXTENSION: 'not supported extension',
-      FILESIZE_TOO_LARGE: 'file size too large',
+      FILE_SIZE_TOO_LARGE: 'file size too large',
       DIMENSION_IMAGE: "please crop the image"
     },
     handleClose = () => { }
@@ -228,7 +228,7 @@ const UploadPictures = forwardRef((
                       {
                         errors.map((error, key) => (
                           <div className="alert alert-warning" key={key} role="alert">
-                            [{error.index}]: {error.filename} : {errorsMessages[error.type]}
+                            [{error.index}]: {error.filename} : {errorMessages[error.type]}
                           </div>
                         ))
                       }
