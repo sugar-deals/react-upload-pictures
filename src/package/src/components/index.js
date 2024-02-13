@@ -200,9 +200,9 @@ const UploadPictures = forwardRef((
     setOpenCrop(false)
     setIndexCrop(false)
     picture.needsCropping = false;
-    let listerrors = errors;
-    listerrors = listerrors.filter(err => err.filename !== picture.name)
-    setErrors(listerrors);
+    let listErrors = errors;
+    listErrors = listErrors.filter(err => err.filename !== picture.name)
+    setErrors(listErrors);
   }
 
   return (

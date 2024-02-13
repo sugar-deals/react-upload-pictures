@@ -44,7 +44,7 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCroppedPicture, iconSi
         <div className="modal modal-dialog modal-dialog-centered modal-dialog-scrollable fade modal-xl show" style={{ zIndex: 100000 }}>
             <div className="modal-dialog">
                 <div className="modal-content modal-crop-content" style={{
-                    "max-width": "500px",
+                    maxWidth: "500px",
                     height: "500px",
                     position:"fixed", left: "50%", top: "calc(50% - 250px)", transform: "translateX(-50%)"
                 }}>
