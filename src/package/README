@@ -1,5 +1,5 @@
 In /workspace/react-upload-pictures/src/package run:
  1) yarn install
  2) yarn build
- 3) manually copy ./src/assets/ folder into ./dist/cjs/ and ./dist/esm/
+ 3) cp -R ./src/assets/ ./dist/cjs/ ./dist/esm/
  4) npm publish
