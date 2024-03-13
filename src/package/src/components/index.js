@@ -1,4 +1,4 @@
-import React, { useCallback, useState, forwardRef, useImperativeHandle } from "react"
+import React, { useCallback, useState, forwardRef, useImperativeHandle, useEffect } from "react"
 
 import "../assets/style/index.scss"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -32,7 +32,9 @@ const UploadPictures = forwardRef((
       FILE_SIZE_TOO_LARGE: 'file size too large',
       DIMENSION_IMAGE: "please crop the image"
     },
-    handleClose = () => { }
+    handleClose = () => { },
+    token = '',
+
   },
   ref
 ) => {
@@ -45,10 +47,12 @@ const UploadPictures = forwardRef((
     }
   }));
   const [pictures, setPictures] = useState([])
+
   const [errors, setErrors] = useState([])
   const [srcCrop, setSrcCrop] = useState(false)
   const [openCrop, setOpenCrop] = useState(false)
   const [indexCrop, setIndexCrop] = useState(false)
+
 
   const hasExtension = (fileName) => {
     const pattern = '(' + imgExtension.join('|').replace(/\./g, '\\.') + ')$';
@@ -148,11 +152,44 @@ const UploadPictures = forwardRef((
     newList.splice(newPos - 1, 0, pic[0]);
     setPictures(newList)
   };
+  const [allPhotos, setallPhotos] = useState([])
 
+  async function fetchIpi(path, accessToken) {
+      const response = await fetch(`https://graph.facebook.com/${path}&access_token=${token}`);
+      return await response.json();
+  }
+
+  async function getAlbums() {
+      const response = await fetchIpi('me/albums?fields=id', token)
+      if(response.data && response.data.length > 0) {
+          await response.data.map(async album => {
+              let data = await getPhotosForAlbumId(album.id)
+              setallPhotos([...allPhotos, ...data])
+          })
+      }
+  }
+
+  async function getPhotosForAlbumId(albumId) {
+      const response = await fetchIpi(`${albumId}/photos?fields=source`)
+      return await response.data && response.data.length > 0 ? response.data : []
+  }
+
+
+  async function FBGetPhotos() {
+    if(token)
+    await getAlbums()
+  }
+  
+  const removeFB = (key) => {
+    let data = allPhotos
+    data.splice(key, 1)
+    setallPhotos([...data])
+  }
   const DraggableRender = useCallback(() => {
 
     return (
       <Draggable onPosChange={getChangedPos}>
+        <>
         {
           pictures && pictures.map((picture, index) => (
             <div className={`${picture.needsCropping ? "border border-warning" : ""} position-relative p-0 mx-2`} key={index} style={{ width: width }}>
@@ -161,9 +198,18 @@ const UploadPictures = forwardRef((
             </div>
           ))
         }
+        {
+          allPhotos && allPhotos.map((fb, key) => (
+            <div className="position-relative p-0 mx-2" key={key} style={{ width: width, height: height }}>
+              <Actions index={key} remove={removeFB} />
+              <ImageDisplay picture={{src: fb.source}} height={height} width={width} className="mb-4" />
+            </div>
+          ))
+        }
+        </>
       </Draggable>
     );
-  }, [pictures]);
+  }, [pictures, allPhotos]);
 
 
   const ImagesRender = useCallback(() => {
@@ -178,9 +224,17 @@ const UploadPictures = forwardRef((
             </div>
           ))
         }
+        {
+          allPhotos && allPhotos.map((fb, key) => (
+            <div className="position-relative p-0 mx-2" key={key} style={{ width: width, height: height }}>
+              <Actions index={key} remove={removeFB} />
+              <ImageDisplay picture={{src: fb.source}} height={height} width={width} className="mb-4" />
+            </div>
+          ))
+        }
       </div>
     );
-  }, [pictures]);
+  }, [pictures, allPhotos]);
 
 
   const cropPicture = (index) => {
@@ -247,6 +301,15 @@ const UploadPictures = forwardRef((
                     <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={multiple} />
                   </div>
                 </div>
+                {
+                  token != "" && (
+                    <div className="row justify-content-center mb-2">
+                      <div className="mb-3" style={{ width: "auto" }}>
+                        <button onClick={() => FBGetPhotos()}>Upload facebook</button>
+                      </div>
+                    </div>
+                  )
+                }
                 {
                   drag && pictures.length > 1 &&
                   <div className="mb-2">
