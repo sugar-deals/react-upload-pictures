@@ -44,6 +44,9 @@ const UploadPictures = forwardRef((
     },
     getPictures() {
       return pictures;
+    },
+    getFBPictures() {
+      return allPhotos;
     }
   }));
   const [pictures, setPictures] = useState([])
