@@ -1,9 +1,10 @@
-import React, { useCallback, useState, forwardRef, useImperativeHandle, useEffect } from "react"
+import React, { useCallback, useState, forwardRef, useImperativeHandle } from "react"
 
 import "../assets/style/index.scss"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCropSimple, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Draggable } from "react-drag-reorder";
+
 import Crop from "./crop";
 
 const ERROR = {
@@ -33,7 +34,7 @@ const UploadPictures = forwardRef((
       DIMENSION_IMAGE: "please crop the image"
     },
     handleClose = () => { },
-    token = '',
+    token = 'EABZARIhgNDPYBOzSl7SRDzZBh6G0qbeZCGoxm4Bhxg8xLAg21aQI98LdURCffzUHyLWZAOdWpvRZCfr1DFj4kOdCin9MiP6LfPe35QI0TkwkVI2ZA09KJR56U8C8ucBVhMBBZAi6Erfs2cCsTgAn6hlZBXkRHxklrgFZBFx4qoiPw5avi7srzU7T5v7vluxvjzBZCogixIZCxMoZBYmrKIObL9MIaE9SzaHfknUu3OWNKjHhQxTGjZClPgX5B',
 
   },
   ref
@@ -149,7 +150,6 @@ const UploadPictures = forwardRef((
   }
 
   const getChangedPos = (currentPos, newPos) => {
-    let index = [];
     let newList = pictures
     let pic = newList.splice(currentPos, 1);
     newList.splice(newPos - 1, 0, pic[0]);
@@ -163,14 +163,37 @@ const UploadPictures = forwardRef((
   }
 
   async function getAlbums() {
-      const response = await fetchIpi('me/albums?fields=id', token)
+      const response = await fetchIpi('me/albums?fields=id,name', token)
       if(response.data && response.data.length > 0) {
           await response.data.map(async album => {
-              let data = await getPhotosForAlbumId(album.id)
-              setallPhotos([...allPhotos, ...data])
+              if(album.name === "Profile pictures") {
+                let data = await getPhotosForAlbumId(album.id)
+                let results = []
+                data.map(async item => {
+                  const src = await imageUrlToBase64(item.source)
+                  results.push({src: src})
+                  setPictures([...pictures, ...results])
+                })
+
+              }
           })
       }
   }
+
+  const imageUrlToBase64 = async (url) => {
+    const data = await fetch(url);
+    const blob = await data.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = () => {
+        const base64data = reader.result;
+        resolve(base64data);
+      };
+      reader.onerror = reject;
+    });
+  };
+
 
   async function getPhotosForAlbumId(albumId) {
       const response = await fetchIpi(`${albumId}/photos?fields=source`)
@@ -182,41 +205,33 @@ const UploadPictures = forwardRef((
     if(token)
     await getAlbums()
   }
-  
+
   const removeFB = (key) => {
     let data = allPhotos
     data.splice(key, 1)
     setallPhotos([...data])
   }
-  const DraggableRender = useCallback(() => {
 
+
+  const DraggableRender = useCallback(() => {
     return (
       <Draggable onPosChange={getChangedPos}>
-        <>
         {
-          pictures && pictures.map((picture, index) => (
-            <div className={`${picture.needsCropping ? "border border-warning" : ""} position-relative p-0 mx-2`} key={index} style={{ width: width }}>
-              <Actions index={index} iconSize={iconSize} remove={remove} cropPicture={cropPicture} crop={crop} />
-              <ImageDisplay picture={picture} height={height} width={width} className="mb-4" />
-            </div>
-          ))
+          pictures.length > 0 && pictures.map((picture, index) => {
+            return (
+                <div className={`${picture.needsCropping ? "border border-warning" : ""} position-relative p-0 mx-2 drager-pictures`} key={index} style={{ width: width }}>
+                  <Actions index={index} iconSize={iconSize} remove={remove} cropPicture={cropPicture} crop={crop} />
+                  <ImageDisplay picture={picture} height={height} width={width} className="mb-4" />
+                </div>
+            )
+            })
         }
-        {
-          allPhotos && allPhotos.map((fb, key) => (
-            <div className="position-relative p-0 mx-2" key={key} style={{ width: width, height: height }}>
-              <Actions index={key} remove={removeFB} />
-              <ImageDisplay picture={{src: fb.source}} height={height} width={width} className="mb-4" />
-            </div>
-          ))
-        }
-        </>
       </Draggable>
     );
-  }, [pictures, allPhotos]);
+  }, [pictures]);
 
 
   const ImagesRender = useCallback(() => {
-
     return (
       <div className="row d-flex justify-content-center">
         {
@@ -227,17 +242,9 @@ const UploadPictures = forwardRef((
             </div>
           ))
         }
-        {
-          allPhotos && allPhotos.map((fb, key) => (
-            <div className="position-relative p-0 mx-2" key={key} style={{ width: width, height: height }}>
-              <Actions index={key} remove={removeFB} />
-              <ImageDisplay picture={{src: fb.source}} height={height} width={width} className="mb-4" />
-            </div>
-          ))
-        }
       </div>
     );
-  }, [pictures, allPhotos]);
+  }, [pictures]);
 
 
   const cropPicture = (index) => {
@@ -300,13 +307,13 @@ const UploadPictures = forwardRef((
                   </div>
                 }
                 <div className="row justify-content-center mb-2">
-                  <div className="mb-3" style={{ width: "auto" }}>
-                    <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={multiple} />
+                  <div className="mb-3" style={{width: "auto"}}>
+                    <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={multiple}/>
                   </div>
                 </div>
                 {
-                  token != "" && (
-                    <div className="row justify-content-center mb-2">
+                    token && (
+                        <div className="row justify-content-center mb-2">
                       <div className="mb-3" style={{ width: "auto" }}>
                         <button onClick={() => FBGetPhotos()}>Upload facebook</button>
                       </div>
@@ -321,13 +328,16 @@ const UploadPictures = forwardRef((
                     </div>
                   </div>
                 }
-                <div className="row d-flex justify-content-center">
+                <div className="row d-flex justify-content-center space-photos">
                   {
-                    drag && pictures.length > 0 ? (
+                    drag && pictures.length > 0 && (
                       <DraggableRender />
-                    ) : (
-                      <ImagesRender />
                     )
+                  }
+                  {
+                      !drag && pictures.length > 0 && (
+                          <ImagesRender />
+                      )
                   }
                 </div>
               </div>
