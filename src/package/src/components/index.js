@@ -1,4 +1,4 @@
-import React, { useCallback, useState, forwardRef, useImperativeHandle } from "react"
+import React, {useCallback, useState, forwardRef, useImperativeHandle, useEffect} from "react"
 
 import "../assets/style/index.scss"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -34,7 +34,8 @@ const UploadPictures = forwardRef((
       DIMENSION_IMAGE: "please crop the image"
     },
     handleClose = () => { },
-    token = 'EABZARIhgNDPYBOzSl7SRDzZBh6G0qbeZCGoxm4Bhxg8xLAg21aQI98LdURCffzUHyLWZAOdWpvRZCfr1DFj4kOdCin9MiP6LfPe35QI0TkwkVI2ZA09KJR56U8C8ucBVhMBBZAi6Erfs2cCsTgAn6hlZBXkRHxklrgFZBFx4qoiPw5avi7srzU7T5v7vluxvjzBZCogixIZCxMoZBYmrKIObL9MIaE9SzaHfknUu3OWNKjHhQxTGjZClPgX5B',
+    setSubmiting = () => { },
+    token = 'EABZARIhgNDPYBO2nguGxukmmPbxg71lB5ENQkM6PVbSFJfaB5deXZCVY9Fq4i6zDH0hHFJMd3ZCnlZAAZBDKKbapyu53VpPxAxlGBO3XAcsKIXzzfnfa5KZA1no0ijIYOES04iQp4mctdZANKLpg8Tjm29qRzq5AMLWQQyBpLrxlZB7EVC6pYDnKlsUmKDPCqllIKTNvmmsR0hfdbVhLrq14ntJF1STxwVXI5bk2MVF9ZB3RqmxuUZAeDI',
 
   },
   ref
@@ -46,9 +47,6 @@ const UploadPictures = forwardRef((
     getPictures() {
       return pictures;
     },
-    getFBPictures() {
-      return allPhotos;
-    }
   }));
   const [pictures, setPictures] = useState([])
 
@@ -57,7 +55,12 @@ const UploadPictures = forwardRef((
   const [openCrop, setOpenCrop] = useState(false)
   const [indexCrop, setIndexCrop] = useState(false)
 
-
+  const [loading, setLoading] = useState(false)
+  useEffect(() => {
+    if(setSubmiting) {
+      setSubmiting(pictures.length > 0)
+    }
+  }, [pictures]);
   const hasExtension = (fileName) => {
     const pattern = '(' + imgExtension.join('|').replace(/\./g, '\\.') + ')$';
     return new RegExp(pattern, 'i').test(fileName);
@@ -173,6 +176,7 @@ const UploadPictures = forwardRef((
                   const src = await imageUrlToBase64(item.source)
                   results.push({src: src})
                   setPictures([...pictures, ...results])
+                  setLoading(false)
                 })
 
               }
@@ -202,8 +206,11 @@ const UploadPictures = forwardRef((
 
 
   async function FBGetPhotos() {
+    setLoading(true)
     if(token)
     await getAlbums()
+    else
+      setLoading(false)
   }
 
   const removeFB = (key) => {
@@ -314,19 +321,28 @@ const UploadPictures = forwardRef((
                 {
                     token && (
                         <div className="row justify-content-center mb-2">
-                      <div className="mb-3" style={{ width: "auto" }}>
-                        <button onClick={() => FBGetPhotos()}>Upload facebook</button>
-                      </div>
-                    </div>
-                  )
+                          <div className="col-12 mb-3" style={{width: "auto"}}>
+                            <button onClick={() => FBGetPhotos()}>Upload facebook</button>
+                          </div>
+                          {
+                            loading && (
+                                  <div className="d-flex justify-content-center mt-3">
+                                    <div className="spinner-border" role="status">
+                                      <span className="sr-only">Loading...</span>
+                                    </div>
+                                  </div>
+                              )
+                          }
+                        </div>
+                    )
                 }
                 {
-                  drag && pictures.length > 1 &&
-                  <div className="mb-2">
-                    <div className="alert alert-info" role="alert">
+                    drag && pictures.length > 1 &&
+                    <div className="mb-2">
+                      <div className="alert alert-info" role="alert">
                       {dragDescription}
+                      </div>
                     </div>
-                  </div>
                 }
                 <div className="row d-flex justify-content-center space-photos">
                   {

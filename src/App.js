@@ -7,12 +7,12 @@ import { faDownload } from "@fortawesome/free-solid-svg-icons";
 function App() {
   const ref = useRef();
   const [open, setOpen] = useState(false)
-
+  const [submiting, setSubmiting] = useState(false)
+  console.log(submiting)
   const submitForm = () => {
     let pic = ref.current.getPictures();
     console.log(pic);
   }
-
 
   const savePictures = (pictures) => {
     //make a POST with pictures and other parameters
@@ -50,6 +50,7 @@ function App() {
                       multiple={true}
                       aspect={15 / 16}
                       handelClose= { () => setOpen(false)}
+                      setSubmiting={(state) => setSubmiting(state) }
                     />
                 </Modal.Body>
                 <Modal.Footer>
