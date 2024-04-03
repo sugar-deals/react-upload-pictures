@@ -29,13 +29,13 @@ const UploadPictures = forwardRef((
     dragDescription = "You can drag pictures to rearrange their order",
     instructions = null,
     errorMessages = {
-      NOT_SUPPORTED_EXTENSION: 'not supported extension',
-      FILE_SIZE_TOO_LARGE: 'file size too large',
-      DIMENSION_IMAGE: "please crop the image"
+      NOT_SUPPORTED_EXTENSION: 'The following files are of unsupported types: ',
+      FILE_SIZE_TOO_LARGE: 'The following files are too large and cannot be imported:',
+      DIMENSION_IMAGE: "The following images need to be cropped: "
     },
     handleClose = () => { },
-    setSubmiting = () => { },
-    token = 'EABZARIhgNDPYBO2nguGxukmmPbxg71lB5ENQkM6PVbSFJfaB5deXZCVY9Fq4i6zDH0hHFJMd3ZCnlZAAZBDKKbapyu53VpPxAxlGBO3XAcsKIXzzfnfa5KZA1no0ijIYOES04iQp4mctdZANKLpg8Tjm29qRzq5AMLWQQyBpLrxlZB7EVC6pYDnKlsUmKDPCqllIKTNvmmsR0hfdbVhLrq14ntJF1STxwVXI5bk2MVF9ZB3RqmxuUZAeDI',
+    setPhotosCallback = () => { },
+    token = '',
 
   },
   ref
@@ -50,15 +50,15 @@ const UploadPictures = forwardRef((
   }));
   const [pictures, setPictures] = useState([])
 
-  const [errors, setErrors] = useState([])
+  const [errors, setErrors] = useState({NOT_SUPPORTED_EXTENSION: [], FILE_SIZE_TOO_LARGE: [], DIMENSION_IMAGE: []})
   const [srcCrop, setSrcCrop] = useState(false)
   const [openCrop, setOpenCrop] = useState(false)
   const [indexCrop, setIndexCrop] = useState(false)
 
   const [loading, setLoading] = useState(false)
   useEffect(() => {
-    if(setSubmiting) {
-      setSubmiting(pictures.length > 0)
+    if(setPhotosCallback) {
+      setPhotosCallback(pictures)
     }
   }, [pictures]);
   const hasExtension = (fileName) => {
@@ -80,73 +80,64 @@ const UploadPictures = forwardRef((
   }
 
   const onFileChange = event => {
-    setErrors([]);
+    setErrors({NOT_SUPPORTED_EXTENSION: [], FILE_SIZE_TOO_LARGE: [], DIMENSION_IMAGE: []});
     let allFilePromises = []
-    let fileError = [];
-    let fileErrors = [];
+    let notSupportedExtensionErrors = [], fileSizeTooLargeErrors = [], dimensionErrors = [];
     if (event.target.files) {
       Array.from(event.target.files).map((file) => {
         if (!hasExtension(file.name)) {
-          fileError = Object.assign(fileError, {
-            type: ERROR.NOT_SUPPORTED_EXTENSION,
-            filename: file.name
-          });
-          fileErrors.push(fileError);
+          notSupportedExtensionErrors.push({ type: ERROR.NOT_SUPPORTED_EXTENSION, filename: file.name });
         }
 
         if (file.size > maxFileSize) {
-          fileError = Object.assign(fileError, {
-            type: ERROR.FILESIZE_TOO_LARGE,
-            filename: file.name
-          });
-          fileErrors.push(fileError);
+          fileSizeTooLargeErrors.push({type: ERROR.FILE_SIZE_TOO_LARGE, filename: file.name });
         }
-        if (fileErrors.length > 0) {
-          setErrors(fileErrors);
+        if (notSupportedExtensionErrors.length > 0 || fileSizeTooLargeErrors.length > 0) {
+          setErrors({NOT_SUPPORTED_EXTENSION : notSupportedExtensionErrors, FILE_SIZE_TOO_LARGE : fileSizeTooLargeErrors});
           return false
         }
         allFilePromises.push(readFile(file));
       })
-      if (fileErrors.length === 0) {
+      if (notSupportedExtensionErrors.length === 0 && fileSizeTooLargeErrors.length === 0) {
         Promise.all(allFilePromises).then(newFilesData => {
           let files = []
           newFilesData.forEach((newFileData, index) => {
             newFileData.file.src = newFileData.dataURL
             var image = new Image();
+            let idx = pictures.length;
             image.src = newFileData.file.src;
+            image.index = idx;
             image.addEventListener('load', () => {
               const { width, height } = image;
               // check aspect ratio of the image
               if (aspect !== (width / height)) {
                 newFileData.file.needsCropping = true;
-                fileErrors.push(
+                dimensionErrors.push(
                   {
-                    index: index,
+                    index: idx,
                     type: ERROR.DIMENSION_IMAGE,
                     filename: newFileData.file.name
                   }
                 );
-                if (errors.length > 0) {
-                  setErrors([...errors, ...fileErrors])
-                }
-                else {
-                  setErrors(fileErrors)
-                }
+                setErrors({NOT_SUPPORTED_EXTENSION : notSupportedExtensionErrors, FILE_SIZE_TOO_LARGE : fileSizeTooLargeErrors, DIMENSION_IMAGE: dimensionErrors});
               }
+              setPictures(pictures => [...pictures,newFileData.file] );
             });
-            files.push(newFileData.file);
           });
-          let oldPictures = pictures;
-          setPictures(oldPictures.concat(files));
         });
       }
     }
   };
 
   const remove = (index) => {
-    let listerrors = errors;
-    listerrors = listerrors.filter(err => err.filename !== pictures[index].name)
-    setErrors(listerrors);
+    let notSupportedExtensionErrors = errors.NOT_SUPPORTED_EXTENSION;
+    let fileSizeTooLargeErrors = errors.FILE_SIZE_TOO_LARGE;
+    let dimensionErrors = errors.DIMENSION_IMAGE;
+    notSupportedExtensionErrors = notSupportedExtensionErrors.filter(err => err.filename !== pictures[index].name);
+    fileSizeTooLargeErrors = fileSizeTooLargeErrors.filter(err => err.filename !== pictures[index].name);
+    dimensionErrors = dimensionErrors.filter(err => err.filename !== pictures[index].name);
+
+    setErrors({NOT_SUPPORTED_EXTENSION : notSupportedExtensionErrors, FILE_SIZE_TOO_LARGE : fileSizeTooLargeErrors, DIMENSION_IMAGE: dimensionErrors});
 
     let newList = pictures.filter((_, i) => i !== index);
     setPictures(newList);
@@ -158,7 +149,7 @@ const UploadPictures = forwardRef((
     newList.splice(newPos - 1, 0, pic[0]);
     setPictures(newList)
   };
-  const [allPhotos, setallPhotos] = useState([])
+  const [allPhotos, setAllPhotos] = useState([])
 
   async function fetchIpi(path, accessToken) {
       const response = await fetch(`https://graph.facebook.com/${path}&access_token=${token}`);
@@ -172,16 +163,30 @@ const UploadPictures = forwardRef((
               if(album.name === "Profile pictures") {
                 let data = await getPhotosForAlbumId(album.id)
                 let results = []
-                data.map(async item => {
-                  const src = await imageUrlToBase64(item.source)
-                  results.push({src: src})
-                  setPictures([...pictures, ...results])
-                  setLoading(false)
-                })
+                let fileErrors = [];
+                data.map(async (item, index) => {
+                  const src = await imageUrlToBase64(item.source);
+                  let needsCropping = false;
 
+                  if (aspect !== (width / height)) {
+                    fileErrors.push(
+                      {
+                        index: index,
+                        type: ERROR.DIMENSION_IMAGE,
+                        filename: ''
+                      }
+                    );
+                    needsCropping = true;
+                  }
+
+                  results.push({src: src, needsCropping: needsCropping})
+                  setPictures([...pictures, ...results])
+                })
+                setErrors(fileErrors);
               }
           })
       }
+      setLoading(false);
   }
 
   const imageUrlToBase64 = async (url) => {
@@ -198,25 +203,33 @@ const UploadPictures = forwardRef((
     });
   };
 
-
   async function getPhotosForAlbumId(albumId) {
       const response = await fetchIpi(`${albumId}/photos?fields=source`)
       return await response.data && response.data.length > 0 ? response.data : []
   }
 
-
   async function FBGetPhotos() {
     setLoading(true)
-    if(token)
-    await getAlbums()
-    else
+    if (token) {
+        await getAlbums()
+    } else {
       setLoading(false)
+    }
   }
 
   const removeFB = (key) => {
     let data = allPhotos
     data.splice(key, 1)
-    setallPhotos([...data])
+    setAllPhotos([...data])
+  }
+
+  async function InstagramGetPhotos() {
+    setLoading(true)
+    if (token) {
+        await getAlbums()
+    } else {
+      setLoading(false)
+    }
   }
 
 
@@ -271,9 +284,10 @@ const UploadPictures = forwardRef((
     setOpenCrop(false)
     setIndexCrop(false)
     picture.needsCropping = false;
-    let listErrors = errors;
+    let listErrors = errors.DIMENSION_IMAGE;
+
     listErrors = listErrors.filter(err => err.filename !== picture.name)
-    setErrors(listErrors);
+    setErrors({NOT_SUPPORTED_EXTENSION : errors.NOT_SUPPORTED_EXTENSION, FILE_SIZE_TOO_LARGE : errors.FILE_SIZE_TOO_LARGE, DIMENSION_IMAGE : listErrors});
   }
 
   return (
@@ -282,8 +296,6 @@ const UploadPictures = forwardRef((
         crop && <Crop picture={srcCrop} isOpen={openCrop} setOpenCrop={setOpenCrop} saveCroppedPicture={saveCroppedPicture} iconSize={iconSize} aspect={aspect} />
       }
       <div ref={ref}>
-
-
         {
           <div className={classStyle}>
             <div className="upload-content">
@@ -291,20 +303,28 @@ const UploadPictures = forwardRef((
                 <div className="upload-header">
                   <h1 className="upload-title fs-5">{title}</h1>
                 </div>
-                : ""}
+              : ""}
               <div className="mb-5 upload-body">
                 {
-                  errors.length > 0 && (
-                    <div>
-                      {
-                        errors.map((error, key) => (
-                          <div className="alert alert-warning" key={key} role="alert">
-                            [{error.index}]: {error.filename} : {errorMessages[error.type]}
-                          </div>
-                        ))
-                      }
-                    </div>
-                  )
+                    errors.FILE_SIZE_TOO_LARGE && errors.FILE_SIZE_TOO_LARGE.length > 0 ?
+                      <div className="alert alert-danger" role="alert">
+                        <strong>{errorMessages[ERROR.FILE_SIZE_TOO_LARGE]}</strong> {errors.FILE_SIZE_TOO_LARGE.map((error) => error.filename).join(', ')}
+                      </div>
+                    :""
+                }
+                {
+                    errors.NOT_SUPPORTED_EXTENSION && errors.NOT_SUPPORTED_EXTENSION.length > 0 ?
+                      <div className="alert alert-danger" role="alert">
+                        <strong>{errorMessages[ERROR.NOT_SUPPORTED_EXTENSION]}</strong> {errors.NOT_SUPPORTED_EXTENSION.map((error) => error.filename).join(', ')}
+                      </div>
+                    :""
+                }
+                {
+                    errors.DIMENSION_IMAGE && errors.DIMENSION_IMAGE.length > 0 ?
+                      <div className="alert alert-warning" role="alert">
+                        <strong>{errorMessages[ERROR.DIMENSION_IMAGE]}</strong> {errors.DIMENSION_IMAGE.map((error) => '[' + error.index + ']').join(', ')}
+                      </div>
+                    :""
                 }
                 {
                   drag && pictures.length === 0 && instructions &&
@@ -313,28 +333,23 @@ const UploadPictures = forwardRef((
                     </div>
                   </div>
                 }
-                <div className="row justify-content-center mb-2">
-                  <div className="mb-3" style={{width: "auto"}}>
+                <div className="row justify-content-center mb-5">
+                  <div className="col" style={{width: "auto"}}>
                     <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={multiple}/>
+                  </div>
+                  <div className="col social-buttons">
+                    <button onClick={() => FBGetPhotos()} className="facebook-import-button">Import from Facebook</button>
+                    <button onClick={() => InstagramGetPhotos()} className="instagram-import-button">Import from Instagram</button>
                   </div>
                 </div>
                 {
-                    token && (
-                        <div className="row justify-content-center mb-2">
-                          <div className="col-12 mb-3" style={{width: "auto"}}>
-                            <button onClick={() => FBGetPhotos()}>Upload facebook</button>
-                          </div>
-                          {
-                            loading && (
-                                  <div className="d-flex justify-content-center mt-3">
-                                    <div className="spinner-border" role="status">
-                                      <span className="sr-only">Loading...</span>
-                                    </div>
-                                  </div>
-                              )
-                          }
-                        </div>
-                    )
+                      loading && (
+                            <div className="d-flex justify-content-center mt-3">
+                              <div className="spinner-border" role="status">
+                                <span className="sr-only">Loading...</span>
+                              </div>
+                            </div>
+                      )
                 }
                 {
                     drag && pictures.length > 1 &&
