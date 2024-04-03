@@ -84,7 +84,7 @@ const UploadPictures = forwardRef((
     let allFilePromises = []
     let notSupportedExtensionErrors = [], fileSizeTooLargeErrors = [], dimensionErrors = [];
     if (event.target.files) {
-      Array.from(event.target.files).map((file) => {
+      Array.from(event.target.files).forEach((file) => {
         if (!hasExtension(file.name)) {
           notSupportedExtensionErrors.push({ type: ERROR.NOT_SUPPORTED_EXTENSION, filename: file.name });
         }
@@ -100,7 +100,6 @@ const UploadPictures = forwardRef((
       })
       if (notSupportedExtensionErrors.length === 0 && fileSizeTooLargeErrors.length === 0) {
         Promise.all(allFilePromises).then(newFilesData => {
-          let files = []
           newFilesData.forEach((newFileData, index) => {
             newFileData.file.src = newFileData.dataURL
             var image = new Image();
@@ -149,7 +148,6 @@ const UploadPictures = forwardRef((
     newList.splice(newPos - 1, 0, pic[0]);
     setPictures(newList)
   };
-  const [allPhotos, setAllPhotos] = useState([])
 
   async function fetchIpi(path, accessToken) {
       const response = await fetch(`https://graph.facebook.com/${path}&access_token=${token}`);
@@ -163,13 +161,13 @@ const UploadPictures = forwardRef((
               if(album.name === "Profile pictures") {
                 let data = await getPhotosForAlbumId(album.id)
                 let results = []
-                let fileErrors = [];
+                let dimensionErrors = [];
                 data.map(async (item, index) => {
                   const src = await imageUrlToBase64(item.source);
                   let needsCropping = false;
 
                   if (aspect !== (width / height)) {
-                    fileErrors.push(
+                    dimensionErrors.push(
                       {
                         index: index,
                         type: ERROR.DIMENSION_IMAGE,
@@ -182,7 +180,7 @@ const UploadPictures = forwardRef((
                   results.push({src: src, needsCropping: needsCropping})
                   setPictures([...pictures, ...results])
                 })
-                setErrors(fileErrors);
+                setErrors({NOT_SUPPORTED_EXTENSION : errors.NOT_SUPPORTED_EXTENSION, FILE_SIZE_TOO_LARGE : errors.FILE_SIZE_TOO_LARGE, DIMENSION_IMAGE: dimensionErrors});
               }
           })
       }
@@ -215,12 +213,6 @@ const UploadPictures = forwardRef((
     } else {
       setLoading(false)
     }
-  }
-
-  const removeFB = (key) => {
-    let data = allPhotos
-    data.splice(key, 1)
-    setAllPhotos([...data])
   }
 
   async function InstagramGetPhotos() {
@@ -389,7 +381,7 @@ function ImageDisplay({ picture, width, height }) {
   return <img src={picture.src} style={{
     height: height,
     width: width,
-  }} className="mb-4" />
+  }} className="mb-4" alt=""/>
 }
 
 
