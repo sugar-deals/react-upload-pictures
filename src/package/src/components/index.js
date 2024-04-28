@@ -3,9 +3,11 @@ import React, {useCallback, useState, forwardRef, useImperativeHandle, useEffect
 import "../assets/style/index.scss"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCropSimple, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { Button, Modal } from 'react-bootstrap';
 import { Draggable } from "react-drag-reorder";
 
 import Crop from "./crop";
+import SocialMediaImportPopup from "./socialMediaImportPopup";
 
 const ERROR = {
   NOT_SUPPORTED_EXTENSION: 'NOT_SUPPORTED_EXTENSION',
@@ -48,19 +50,22 @@ const UploadPictures = forwardRef((
       return pictures;
     },
   }));
-  const [pictures, setPictures] = useState([])
+  const [pictures, setPictures] = useState([]);
+  const [socialRawMediaPictures, setSocialMediaRawPictures] = useState([]);
+  const [socialMediaSelectedPictures, setSocialMediaSelectedPictures] = useState([]);
 
   const [errors, setErrors] = useState({NOT_SUPPORTED_EXTENSION: [], FILE_SIZE_TOO_LARGE: [], DIMENSION_IMAGE: []})
   const [srcCrop, setSrcCrop] = useState(false)
   const [openCrop, setOpenCrop] = useState(false)
   const [indexCrop, setIndexCrop] = useState(false)
+  const [socialOpen, setSocialOpen] = useState(false);
 
   const [loading, setLoading] = useState(false)
   useEffect(() => {
     if(setPhotosCallback) {
       setPhotosCallback(pictures)
     }
-  }, [pictures]);
+  }, [pictures?.length]);
   const hasExtension = (fileName) => {
     const pattern = '(' + imgExtension.join('|').replace(/\./g, '\\.') + ')$';
     return new RegExp(pattern, 'i').test(fileName);
@@ -79,7 +84,7 @@ const UploadPictures = forwardRef((
     });
   }
 
-  const onFileChange = event => {
+  const onFileChange = useCallback(event => {
     setErrors({NOT_SUPPORTED_EXTENSION: [], FILE_SIZE_TOO_LARGE: [], DIMENSION_IMAGE: []});
     let allFilePromises = []
     let notSupportedExtensionErrors = [], fileSizeTooLargeErrors = [], dimensionErrors = [];
@@ -103,9 +108,8 @@ const UploadPictures = forwardRef((
           newFilesData.forEach((newFileData, index) => {
             newFileData.file.src = newFileData.dataURL
             var image = new Image();
-            let idx = pictures.length;
             image.src = newFileData.file.src;
-            image.index = idx;
+            image.index = index;
             image.addEventListener('load', () => {
               const { width, height } = image;
               // check aspect ratio of the image
@@ -113,12 +117,12 @@ const UploadPictures = forwardRef((
                 newFileData.file.needsCropping = true;
                 dimensionErrors.push(
                   {
-                    index: idx,
+                    index: index + pictures?.length,
                     type: ERROR.DIMENSION_IMAGE,
                     filename: newFileData.file.name
                   }
                 );
-                setErrors({NOT_SUPPORTED_EXTENSION : notSupportedExtensionErrors, FILE_SIZE_TOO_LARGE : fileSizeTooLargeErrors, DIMENSION_IMAGE: dimensionErrors});
+                setErrors({NOT_SUPPORTED_EXTENSION : notSupportedExtensionErrors, FILE_SIZE_TOO_LARGE : fileSizeTooLargeErrors, DIMENSION_IMAGE: [...errors.DIMENSION_IMAGE, ...dimensionErrors.sort(sortErrorsByIndex)]});
               }
               setPictures(pictures => [...pictures,newFileData.file] );
             });
@@ -126,7 +130,7 @@ const UploadPictures = forwardRef((
         });
       }
     }
-  };
+  }, [pictures?.length, aspect, hasExtension, maxFileSize]);
 
   const remove = (index) => {
     let notSupportedExtensionErrors = errors.NOT_SUPPORTED_EXTENSION;
@@ -134,9 +138,9 @@ const UploadPictures = forwardRef((
     let dimensionErrors = errors.DIMENSION_IMAGE;
     notSupportedExtensionErrors = notSupportedExtensionErrors.filter(err => err.filename !== pictures[index].name);
     fileSizeTooLargeErrors = fileSizeTooLargeErrors.filter(err => err.filename !== pictures[index].name);
-    dimensionErrors = dimensionErrors.filter(err => err.filename !== pictures[index].name);
+    dimensionErrors = dimensionErrors.filter(err => err.index !== index).map((el, i) => ({...el, index: i >= index ? el.index - 1 : el.index}));
 
-    setErrors({NOT_SUPPORTED_EXTENSION : notSupportedExtensionErrors, FILE_SIZE_TOO_LARGE : fileSizeTooLargeErrors, DIMENSION_IMAGE: dimensionErrors});
+    setErrors({NOT_SUPPORTED_EXTENSION : notSupportedExtensionErrors, FILE_SIZE_TOO_LARGE : fileSizeTooLargeErrors, DIMENSION_IMAGE: dimensionErrors.sort(sortErrorsByIndex)});
 
     let newList = pictures.filter((_, i) => i !== index);
     setPictures(newList);
@@ -144,9 +148,16 @@ const UploadPictures = forwardRef((
 
   const getChangedPos = (currentPos, newPos) => {
     let newList = pictures
+    let errorList = errors;
     let pic = newList.splice(currentPos, 1);
     newList.splice(newPos - 1, 0, pic[0]);
-    setPictures(newList)
+
+    let picError = errorList.DIMENSION_IMAGE.splice(currentPos, 1);
+    errorList.DIMENSION_IMAGE.splice(newPos - 1, 0, picError[0]);
+    errorList.DIMENSION_IMAGE[currentPos].index = currentPos;
+    errorList.DIMENSION_IMAGE[newPos].index = newPos;
+    setPictures(newList);
+    setErrors(errorList);
   };
 
   async function fetchIpi(path, accessToken) {
@@ -154,38 +165,15 @@ const UploadPictures = forwardRef((
       return await response.json();
   }
 
-  async function getAlbums() {
-      const response = await fetchIpi('me/albums?fields=id,name', token)
-      if(response.data && response.data.length > 0) {
-          await response.data.map(async album => {
-              if(album.name === "Profile pictures") {
-                let data = await getPhotosForAlbumId(album.id)
-                let results = []
-                let dimensionErrors = [];
-                data.map(async (item, index) => {
-                  const src = await imageUrlToBase64(item.source);
-                  let needsCropping = false;
-
-                  if (aspect !== (width / height)) {
-                    dimensionErrors.push(
-                      {
-                        index: index,
-                        type: ERROR.DIMENSION_IMAGE,
-                        filename: ''
-                      }
-                    );
-                    needsCropping = true;
-                  }
-
-                  results.push({src: src, needsCropping: needsCropping})
-                  setPictures([...pictures, ...results])
-                })
-                setErrors({NOT_SUPPORTED_EXTENSION : errors.NOT_SUPPORTED_EXTENSION, FILE_SIZE_TOO_LARGE : errors.FILE_SIZE_TOO_LARGE, DIMENSION_IMAGE: dimensionErrors});
-              }
-          })
-      }
-      setLoading(false);
-  }
+  const sortErrorsByIndex = (a, b) => {
+    if (a.index > b.index) {
+      return 1
+    } else if (a.index < b.index) {
+      return -1
+    } else {
+      return 0
+    }
+  };
 
   const imageUrlToBase64 = async (url) => {
     const data = await fetch(url);
@@ -206,23 +194,46 @@ const UploadPictures = forwardRef((
       return await response.data && response.data.length > 0 ? response.data : []
   }
 
-  async function FBGetPhotos() {
+  async function InstagramGetPhotos() {
     setLoading(true)
     if (token) {
-        await getAlbums()
+        // await getAlbums()
     } else {
       setLoading(false)
     }
   }
 
-  async function InstagramGetPhotos() {
-    setLoading(true)
-    if (token) {
-        await getAlbums()
-    } else {
-      setLoading(false)
-    }
+  const setSocialMediaPhotosCallback = (socialPics, selected) => {
+    setSocialMediaRawPictures(socialPics);
+    setSocialMediaSelectedPictures(selected);
   }
+
+  const saveSocialPictures = useCallback(async () => {
+    const selectedPictures = socialRawMediaPictures.filter((_, index) => socialMediaSelectedPictures.includes(index));
+    let dimensionErrors = [];
+    const results = await Promise.all(selectedPictures.map(async (item, index) => {
+      const src = await imageUrlToBase64(item.src);
+      let needsCropping = false;
+
+      if (aspect !== (width / height)) {
+        dimensionErrors.push(
+          {
+            index: index + pictures?.length,
+            type: ERROR.DIMENSION_IMAGE,
+            filename: ''
+          }
+        );
+        needsCropping = true;
+      }
+
+      return {src: src, needsCropping: needsCropping};
+    }))
+    if (results) {
+      setPictures([...pictures, ...results]);
+    }
+    setErrors({NOT_SUPPORTED_EXTENSION : errors.NOT_SUPPORTED_EXTENSION, FILE_SIZE_TOO_LARGE : errors.FILE_SIZE_TOO_LARGE, DIMENSION_IMAGE: [...errors.DIMENSION_IMAGE, ...dimensionErrors.sort(sortErrorsByIndex)]});
+    setSocialOpen(false);
+  }, [pictures, socialMediaSelectedPictures, socialRawMediaPictures, errors]);
 
 
   const DraggableRender = useCallback(() => {
@@ -278,7 +289,7 @@ const UploadPictures = forwardRef((
     picture.needsCropping = false;
     let listErrors = errors.DIMENSION_IMAGE;
 
-    listErrors = listErrors.filter(err => err.filename !== picture.name)
+    listErrors = listErrors.filter(err => err.index !== indexCrop)
     setErrors({NOT_SUPPORTED_EXTENSION : errors.NOT_SUPPORTED_EXTENSION, FILE_SIZE_TOO_LARGE : errors.FILE_SIZE_TOO_LARGE, DIMENSION_IMAGE : listErrors});
   }
 
@@ -330,7 +341,7 @@ const UploadPictures = forwardRef((
                     <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={multiple}/>
                   </div>
                   <div className="col social-buttons">
-                    <button onClick={() => FBGetPhotos()} className="facebook-import-button">Import from Facebook</button>
+                    <button onClick={() => setSocialOpen(true)} className="facebook-import-button">Import from Facebook</button>
                     <button onClick={() => InstagramGetPhotos()} className="instagram-import-button">Import from Instagram</button>
                   </div>
                 </div>
@@ -372,6 +383,36 @@ const UploadPictures = forwardRef((
           </div>
         }
       </div>
+      {socialOpen && (
+             <Modal
+                show={socialOpen}
+                onHide={()=>setSocialOpen(false)}
+                size="xl"
+                keyboard={true}>
+                <Modal.Header closeButton>
+                  <Modal.Title>Select Images</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                <SocialMediaImportPopup
+                      ref={ref}
+                      height="100px"
+                      width="100px"
+                      iconSize="lg"
+                      handleClose= { () => setSocialOpen(false)}
+                      setPhotosCallback={setSocialMediaPhotosCallback}
+                      token='EAAKosm6F54gBOZCQTNmLQQsEgEH5s6nA3a8jgW88TukZCPG0yYcF6TymPq8PBU2Dar7N4uyZA6ryq2z3qqfb06t82rSDR6drKp7iUhrQZBytR0N8gOLRfyUuUCumZBbp37Df8ZAxpJ5pPtXowpc6BCaey7Qkt0yoMQTLcoHOmFRM2lZA3bbpfFCRTd276SK34akZCHkEh5hE4Nc3uZAhJQ7WZBplcjl30ZD'
+                    />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setSocialOpen(false)}>
+                        Close
+                    </Button>
+                    <Button variant="primary" className="text-white" onClick={saveSocialPictures} disabled={false} data-bs-toggle="tooltip" data-bs-placement="top" title="Tooltip on top">
+                        Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+      )}
     </>
   )
 })

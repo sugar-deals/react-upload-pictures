@@ -48,7 +48,6 @@ function App() {
                 <Modal.Body>
                     <UploadPictures
                       ref={ref}
-                      isOpen={false}
                       imgExtension={['.jpg', '.jpeg', '.gif', '.png']}
                       maxFileSize={5242880}
                       height="100px"
@@ -60,9 +59,9 @@ function App() {
                       savePictures={savePictures}
                       multiple={true}
                       aspect={15 / 16}
-                      handelClose= { () => setOpen(false)}
+                      handleClose= { () => setOpen(false)}
                       setPhotosCallback={(photos) => updatePhotos(photos) }
-                      token='EABZARIhgNDPYBOZCpnR26eRiQh6LAKANWJ6RH1fPZBKCxPCoPBrRqHQROHZCjs6RaZByVwEMYxXyKTPZB84pN0WzQDZCobGCmBIxJEAO5T3Bir9mwjMdi6zf7JiiGEF08CJ5deCC3tG1fltloHCK0pe3YFZBvZBZBHqzL0GUL5ZBhcSuqq3ZC1Dr0EUWNgZDZD'
+                      token='EAAKosm6F54gBOyr2sY0L16CVGqxabNC3vOtMsZAMKBMVhA0MBr70EYrsAMkmsc5A8skJ67902xfDCRKJ5pGWYbbVWSCzlZAG1oPChODo1Ldr5OrSCq2zBzBnEQe29w1SxLKqf8oZBkLFGCZBao7dxY4hsdJzqpcqXZAVsN8VwVW50iM3QtNhZBHk4mi2mNcZBlX6pBTx2W3Qf2nAGhYnAJ5QDsGodMRxvXMwyxNTFcGchiU271tu5YIayskBYXnfQZDZD'
                     />
                 </Modal.Body>
                 <Modal.Footer>
