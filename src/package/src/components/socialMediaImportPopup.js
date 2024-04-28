@@ -150,39 +150,6 @@ const SocialMediaImportPopup = forwardRef((
                             </div>
                           ))
                         }
-                        {
-                          pictures.map((picture, index) => (
-                            <div 
-                             className={`position-relative p-0 mx-2 mb-4 social-media ${selected.includes(index) ? 'selected' : ''}`} 
-                             key={index} style={{ width: width, height: height }} 
-                             onClick={() => toggleMarkSelected(index)}
-                            >
-                              <ImageDisplay picture={picture} height={height} width={width} className="mb-4" />
-                            </div>
-                          ))
-                        }
-                        {
-                          pictures.map((picture, index) => (
-                            <div 
-                             className={`position-relative p-0 mx-2 mb-4 social-media ${selected.includes(index) ? 'selected' : ''}`} 
-                             key={index} style={{ width: width, height: height }} 
-                             onClick={() => toggleMarkSelected(index)}
-                            >
-                              <ImageDisplay picture={picture} height={height} width={width} className="mb-4" />
-                            </div>
-                          ))
-                        }
-                        {
-                          pictures.map((picture, index) => (
-                            <div 
-                             className={`position-relative p-0 mx-2 mb-4 social-media ${selected.includes(index) ? 'selected' : ''}`} 
-                             key={index} style={{ width: width, height: height }} 
-                             onClick={() => toggleMarkSelected(index)}
-                            >
-                              <ImageDisplay picture={picture} height={height} width={width} className="mb-4" />
-                            </div>
-                          ))
-                        }
                       </div>
                     )
                   }
