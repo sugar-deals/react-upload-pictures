@@ -94,8 +94,9 @@ const SocialMediaImportPopup = forwardRef((
       const getAndSetInstagramAccessToken = async (accessCode) => {
         try {
           const result = await ApiCall.post('account/social/exchange/instagram', { accessCode, redirectUri: window.location.href.split('?')[0]});
-          if (result) {
-            setTokenAndTimestamp(result);
+
+          if (result?.data && result?.data?.access_token) {
+            setTokenAndTimestamp(result?.data?.access_token);
           } else {
             handleClose();
           }
