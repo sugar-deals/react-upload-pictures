@@ -58,7 +58,7 @@ const SocialMediaImportPopup = forwardRef((
       return [null, null];
     }
 
-    const pieces = rawData.split('-');
+    const pieces = rawData.split('~~');
     const accessToken = pieces?.[0];
     const timestamp = parseInt(pieces?.[1]);
 
@@ -71,7 +71,7 @@ const SocialMediaImportPopup = forwardRef((
   }, [modalSource]);
 
   const setTokenAndTimestamp = useCallback((accessToken) => {
-    localStorage.setItem(`${modalSource}Token`, `${accessToken}-${Date.now()}`);
+    localStorage.setItem(`${modalSource}Token`, `${accessToken}~~${Date.now()}`);
     setCurrentToken(accessToken);
   }, [modalSource]);
 
