@@ -93,7 +93,7 @@ const SocialMediaImportPopup = forwardRef((
     } else if (!accessToken && instagramAccessCode && modalSource === 'instagram') {
       const getAndSetInstagramAccessToken = async (accessCode) => {
         try {
-          const result = await ApiCall.post('account/exchangeCode', { accessCode, redirectUri: window.location.href.split('?')[0]});
+          const result = await ApiCall.post('account/social/exchange/instagram', { accessCode, redirectUri: window.location.href.split('?')[0]});
           if (result) {
             setTokenAndTimestamp(result);
           } else {
