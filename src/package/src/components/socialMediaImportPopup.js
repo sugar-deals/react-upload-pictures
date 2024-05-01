@@ -47,6 +47,7 @@ const SocialMediaImportPopup = forwardRef((
   const [pictures, setPictures] = useState([]);
   const [selected, setSelected] = useState([]);
   const [currentToken, setCurrentToken] = useState(token);
+  const [isPulled, setIsPulled] = useState(false);
 
   const [loading, setLoading] = useState(false)
 
@@ -106,15 +107,17 @@ const SocialMediaImportPopup = forwardRef((
       getAndSetInstagramAccessToken(instagramAccessCode);
     }
 
-    switch (modalSource) {
-      case "facebook":
-        FBGetPhotos();
-        break;
-      case "instagram":
-        InstagramGetPhotos();
-        break;
+    if (!isPulled) {
+      switch (modalSource) {
+        case "facebook":
+          FBGetPhotos();
+          break;
+        case "instagram":
+          InstagramGetPhotos();
+          break;
+      }
     }
-  }, [modalSource, currentToken])
+  }, [modalSource, currentToken, isPulled])
 
   async function fetchFBPic(path, accessToken) {
       const response = await fetch(`https://graph.facebook.com/${path}&access_token=${accessToken}`);
@@ -153,6 +156,7 @@ const SocialMediaImportPopup = forwardRef((
         }
       }
       setLoading(false);
+      setIsPulled(true);
   }, [[...pictures], currentToken])
 
   async function getPhotosForAlbumId(albumId, accessToken) {
@@ -216,13 +220,13 @@ const SocialMediaImportPopup = forwardRef((
                   <h1 className="upload-title fs-5">{title}</h1>
                 </div>
               : ""}
-              {!!selected?.length &&
-                  <div className="mb-2">
-                    <div className="alert alert-info" role="alert">
-                        {`(${selected?.length}) pictures selected`}
-                    </div>
+              
+                <div className="mb-2">
+                  <div className="alert alert-info" role="alert">
+                      {`(${selected?.length}) pictures selected`}
                   </div>
-              }
+                </div>
+            
               <div className="mb-5 upload-body">
                 <div className="row justify-content-center mb-5">
                   <div className="col" style={{width: "auto"}}>
