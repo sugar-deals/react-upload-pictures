@@ -220,7 +220,7 @@ const SocialMediaImportPopup = forwardRef((
                   <h1 className="upload-title fs-5">{title}</h1>
                 </div>
               : ""}
-              
+
                 <div className="mb-2">
                   <div className="alert alert-info" role="alert">
                       {`(${selected?.length}) pictures selected`}

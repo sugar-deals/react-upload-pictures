@@ -37,7 +37,7 @@ const UploadPictures = forwardRef((
     },
     handleClose = () => { },
     setPhotosCallback = () => { },
-    token = '',
+    openedSocialOverride = false,
 
   },
   ref
@@ -58,7 +58,7 @@ const UploadPictures = forwardRef((
   const [srcCrop, setSrcCrop] = useState(false)
   const [openCrop, setOpenCrop] = useState(false)
   const [indexCrop, setIndexCrop] = useState(false)
-  const [openedSocial, setOpenedSocial] = useState(false);
+  const [openedSocial, setOpenedSocial] = useState(openedSocialOverride);
 
   const [loading, setLoading] = useState(false)
   useEffect(() => {
@@ -66,6 +66,13 @@ const UploadPictures = forwardRef((
       setPhotosCallback(pictures)
     }
   }, [pictures?.length]);
+
+  useEffect(() => {
+    if (window.location.search.includes("?code")) {
+      setOpenedSocial('instagram');
+    }
+  }, [])
+
   const hasExtension = (fileName) => {
     const pattern = '(' + imgExtension.join('|').replace(/\./g, '\\.') + ')$';
     return new RegExp(pattern, 'i').test(fileName);

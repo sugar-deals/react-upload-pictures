@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button, Modal } from 'react-bootstrap';
 import UploadPictures from "./package/src/index.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -28,6 +28,12 @@ function App() {
         setHasUncroppedPhotos(false);
     }
   }
+
+  useEffect(() => {
+    if (window.location.search.includes("?code")) {
+      setOpen(true);
+    }
+  }, [])
 
   return (
     <div className="App">
@@ -61,7 +67,6 @@ function App() {
                       aspect={15 / 16}
                       handleClose= { () => setOpen(false)}
                       setPhotosCallback={(photos) => updatePhotos(photos) }
-                      token='EAAKosm6F54gBOyr2sY0L16CVGqxabNC3vOtMsZAMKBMVhA0MBr70EYrsAMkmsc5A8skJ67902xfDCRKJ5pGWYbbVWSCzlZAG1oPChODo1Ldr5OrSCq2zBzBnEQe29w1SxLKqf8oZBkLFGCZBao7dxY4hsdJzqpcqXZAVsN8VwVW50iM3QtNhZBHk4mi2mNcZBlX6pBTx2W3Qf2nAGhYnAJ5QDsGodMRxvXMwyxNTFcGchiU271tu5YIayskBYXnfQZDZD'
                     />
                 </Modal.Body>
                 <Modal.Footer>
