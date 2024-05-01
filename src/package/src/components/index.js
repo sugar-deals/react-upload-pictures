@@ -58,7 +58,7 @@ const UploadPictures = forwardRef((
   const [srcCrop, setSrcCrop] = useState(false)
   const [openCrop, setOpenCrop] = useState(false)
   const [indexCrop, setIndexCrop] = useState(false)
-  const [socialOpen, setSocialOpen] = useState(false);
+  const [openedSocial, setOpenedSocial] = useState(false);
 
   const [loading, setLoading] = useState(false)
   useEffect(() => {
@@ -160,11 +160,6 @@ const UploadPictures = forwardRef((
     setErrors(errorList);
   };
 
-  async function fetchIpi(path, accessToken) {
-      const response = await fetch(`https://graph.facebook.com/${path}&access_token=${token}`);
-      return await response.json();
-  }
-
   const sortErrorsByIndex = (a, b) => {
     if (a.index > b.index) {
       return 1
@@ -188,20 +183,6 @@ const UploadPictures = forwardRef((
       reader.onerror = reject;
     });
   };
-
-  async function getPhotosForAlbumId(albumId) {
-      const response = await fetchIpi(`${albumId}/photos?fields=source`)
-      return await response.data && response.data.length > 0 ? response.data : []
-  }
-
-  async function InstagramGetPhotos() {
-    setLoading(true)
-    if (token) {
-        // await getAlbums()
-    } else {
-      setLoading(false)
-    }
-  }
 
   const setSocialMediaPhotosCallback = (socialPics, selected) => {
     setSocialMediaRawPictures(socialPics);
@@ -232,7 +213,9 @@ const UploadPictures = forwardRef((
       setPictures([...pictures, ...results]);
     }
     setErrors({NOT_SUPPORTED_EXTENSION : errors.NOT_SUPPORTED_EXTENSION, FILE_SIZE_TOO_LARGE : errors.FILE_SIZE_TOO_LARGE, DIMENSION_IMAGE: [...errors.DIMENSION_IMAGE, ...dimensionErrors.sort(sortErrorsByIndex)]});
-    setSocialOpen(false);
+    setOpenedSocial(false);
+    setSocialMediaRawPictures([]);
+    setSocialMediaSelectedPictures([]);
   }, [pictures, socialMediaSelectedPictures, socialRawMediaPictures, errors]);
 
 
@@ -341,8 +324,8 @@ const UploadPictures = forwardRef((
                     <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={multiple}/>
                   </div>
                   <div className="col social-buttons">
-                    <button onClick={() => setSocialOpen(true)} className="facebook-import-button">Import from Facebook</button>
-                    <button onClick={() => InstagramGetPhotos()} className="instagram-import-button">Import from Instagram</button>
+                    <button onClick={() => setOpenedSocial('facebook')} className="facebook-import-button">Import from Facebook</button>
+                    <button onClick={() => setOpenedSocial('instagram')} className="instagram-import-button">Import from Instagram</button>
                   </div>
                 </div>
                 {
@@ -383,10 +366,10 @@ const UploadPictures = forwardRef((
           </div>
         }
       </div>
-      {socialOpen && (
+      {!!openedSocial && (
              <Modal
-                show={socialOpen}
-                onHide={()=>setSocialOpen(false)}
+                show={!!openedSocial}
+                onHide={()=>setOpenedSocial(false)}
                 size="xl"
                 keyboard={true}>
                 <Modal.Header closeButton>
@@ -395,19 +378,19 @@ const UploadPictures = forwardRef((
                 <Modal.Body>
                 <SocialMediaImportPopup
                       ref={ref}
+                      modalSource={openedSocial}
                       height="100px"
                       width="100px"
                       iconSize="lg"
-                      handleClose= { () => setSocialOpen(false)}
+                      handleClose= { () => setOpenedSocial(false)}
                       setPhotosCallback={setSocialMediaPhotosCallback}
-                      token='EAAKosm6F54gBOZCQTNmLQQsEgEH5s6nA3a8jgW88TukZCPG0yYcF6TymPq8PBU2Dar7N4uyZA6ryq2z3qqfb06t82rSDR6drKp7iUhrQZBytR0N8gOLRfyUuUCumZBbp37Df8ZAxpJ5pPtXowpc6BCaey7Qkt0yoMQTLcoHOmFRM2lZA3bbpfFCRTd276SK34akZCHkEh5hE4Nc3uZAhJQ7WZBplcjl30ZD'
                     />
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setSocialOpen(false)}>
+                    <Button variant="secondary" onClick={() => setOpenedSocial(false)}>
                         Close
                     </Button>
-                    <Button variant="primary" className="text-white" onClick={saveSocialPictures} disabled={false} data-bs-toggle="tooltip" data-bs-placement="top" title="Tooltip on top">
+                    <Button variant="primary" className="text-white" onClick={saveSocialPictures} disabled={!socialMediaSelectedPictures?.length} data-bs-toggle="tooltip" data-bs-placement="top" title="Tooltip on top">
                         Save
                     </Button>
                 </Modal.Footer>
