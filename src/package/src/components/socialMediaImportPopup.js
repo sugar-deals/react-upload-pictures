@@ -89,11 +89,11 @@ const SocialMediaImportPopup = forwardRef((
     if (accessToken && !currentToken) {
       setCurrentToken(accessToken);
     } else if (!accessToken && !instagramAccessCode && modalSource === 'instagram') {
-      window.location.href = "https://api.instagram.com/oauth/authorize?client_id=" + process.env.REACT_APP_INSTAGRAM_APP_ID + "&redirect_uri=" + window.location.href + "&scope=user_profile,user_media&response_type=code";
+      window.location.href = "https://api.instagram.com/oauth/authorize?client_id=" + process.env.REACT_APP_INSTAGRAM_APP_ID + "&redirect_uri=" + window.location.origin + "/callback/instagram" + "&scope=user_profile,user_media&response_type=code";
     } else if (!accessToken && instagramAccessCode && modalSource === 'instagram') {
       const getAndSetInstagramAccessToken = async (accessCode) => {
         try {
-          const result = await ApiCall.post('account/social/exchange/instagram', { accessCode, redirectUri: window.location.href.split('?')[0]});
+          const result = await ApiCall.post('account/social/exchange/instagram', { accessCode, redirectUri: window.location.origin + "/callback/instagram"});
 
           if (result?.data && result?.data?.access_token) {
             setTokenAndTimestamp(result?.data?.access_token);

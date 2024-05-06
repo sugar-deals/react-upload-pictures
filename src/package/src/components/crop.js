@@ -23,11 +23,11 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCroppedPicture, iconSi
     const showCroppedImage = async () => {
         try {
             const croppedImage = await getCroppedImg(
-                picture.src,
+                picture.contents.file.src,
                 croppedAreaPixels,
                 rotation
             )
-            picture.src = await croppedImage
+            picture.contents.file.src = await croppedImage
             saveCroppedPicture(picture);
             setZoom(1)
             setRotation(0)
@@ -54,7 +54,7 @@ function Crop({ isOpen = false, setOpenCrop, picture, saveCroppedPicture, iconSi
                     </div>
                     <div className="modal-body">
                         <Cropper
-                            image={picture.src}
+                            image={picture.contents.file.src}
                             crop={crop}
                             zoom={zoom}
                             aspect={aspect}

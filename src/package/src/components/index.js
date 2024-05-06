@@ -50,7 +50,7 @@ const UploadPictures = forwardRef((
       };
     },
     getPictures() {
-      return pictures.map(el => el.contents);
+      return pictures.map(el => el.contents.file);
     },
   }));
   const [pictures, setPictures] = useState([]);
@@ -111,13 +111,14 @@ const UploadPictures = forwardRef((
           errors.FILE_SIZE_TOO_LARGE = {type: ERROR.FILE_SIZE_TOO_LARGE, filename: file.name};
         }
 
-        const newFile = new Promise.resolve(async () => ({
+        const newFile = new Promise(async (resolve) => resolve({
           ...errors,
           contents: !errors.FILE_SIZE_TOO_LARGE && !errors.NOT_SUPPORTED_EXTENSION ? await readFile(file) : null ,
         }));
 
         allFilePromises.push(newFile);
       })
+
       Promise.all(allFilePromises).then(newFilesData => {
         newFilesData.forEach((newFileData, index) => {
           newFileData.contents.file.src = newFileData.contents.dataURL
@@ -191,8 +192,12 @@ const UploadPictures = forwardRef((
       }
 
       return {
-        src: src, 
-        needsCropping: needsCropping,
+        contents: {
+          file: {
+            src: src,
+            needsCropping: needsCropping,
+          },
+        }, 
         NOT_SUPPORTED_EXTENSION: false,
         FILE_SIZE_TOO_LARGE: false,
         DIMENSION_IMAGE: dimensionError,
@@ -213,9 +218,9 @@ const UploadPictures = forwardRef((
         {
           pictures.length > 0 && pictures.map((picture, index) => {
             return (
-                <div className={`${picture.needsCropping ? "border border-warning" : ""} position-relative p-0 mx-2 drager-pictures`} key={index} style={{ width: width }}>
+                <div className={`${picture.contents.file.needsCropping ? "border border-warning" : ""} position-relative p-0 mx-2 drager-pictures`} key={index} style={{ width: width }}>
                   <Actions index={index} iconSize={iconSize} remove={remove} cropPicture={cropPicture} crop={crop} />
-                  <ImageDisplay picture={picture} height={height} width={width} className="mb-4" />
+                  <ImageDisplay picture={picture.contents.file} height={height} width={width} className="mb-4" />
                 </div>
             )
             })
@@ -232,7 +237,7 @@ const UploadPictures = forwardRef((
           pictures && pictures.map((picture, index) => (
             <div className="position-relative p-0 mx-2" key={index} style={{ width: width, height: height }}>
               <Actions index={index} iconSize={iconSize} remove={remove} cropPicture={cropPicture} crop={crop} />
-              <ImageDisplay picture={picture} height={height} width={width} className="mb-4" />
+              <ImageDisplay picture={picture.contents.file} height={height} width={width} className="mb-4" />
             </div>
           ))
         }
@@ -250,14 +255,19 @@ const UploadPictures = forwardRef((
 
   const saveCroppedPicture = (picture) => {
     let newPicture = {...picture};
-    newPicture.needsCropping = false;
+
+    newPicture.contents.file.needsCropping = false;
     newPicture.DIMENSION_IMAGE = false;
 
-    setPictures(items => items.map((item, i) =>
-      i === indexCrop
-        ? newPicture
-        : item
-    ));
+    setPictures(items => {
+      const res = items.map((item, i) =>
+        i === indexCrop
+          ? newPicture
+          : item
+      );
+      setPhotosCallback(res);
+      return res;
+    });
     setSrcCrop(false)
     setOpenCrop(false)
     setIndexCrop(false)
