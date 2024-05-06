@@ -38,23 +38,25 @@ const UploadPictures = forwardRef((
     handleClose = () => { },
     setPhotosCallback = () => { },
     openedSocialOverride = false,
-
   },
   ref
 ) => {
   useImperativeHandle(ref, () => ({
     getErrors() {
-      return errors;
+      return {
+        NOT_SUPPORTED_EXTENSION: pictures.map(el => el.NOT_SUPPORTED_EXTENSION),
+        FILE_SIZE_TOO_LARGE: pictures.map(el => el.FILE_SIZE_TOO_LARGE),
+        DIMENSION_IMAGE: pictures.map(el => el.DIMENSION_IMAGE),
+      };
     },
     getPictures() {
-      return pictures;
+      return pictures.map(el => el.contents);
     },
   }));
   const [pictures, setPictures] = useState([]);
   const [socialRawMediaPictures, setSocialMediaRawPictures] = useState([]);
   const [socialMediaSelectedPictures, setSocialMediaSelectedPictures] = useState([]);
 
-  const [errors, setErrors] = useState({NOT_SUPPORTED_EXTENSION: [], FILE_SIZE_TOO_LARGE: [], DIMENSION_IMAGE: []})
   const [srcCrop, setSrcCrop] = useState(false)
   const [openCrop, setOpenCrop] = useState(false)
   const [indexCrop, setIndexCrop] = useState(false)
@@ -92,89 +94,65 @@ const UploadPictures = forwardRef((
   }
 
   const onFileChange = useCallback(event => {
-    setErrors({NOT_SUPPORTED_EXTENSION: [], FILE_SIZE_TOO_LARGE: [], DIMENSION_IMAGE: []});
-    let allFilePromises = []
-    let notSupportedExtensionErrors = [], fileSizeTooLargeErrors = [], dimensionErrors = [];
+    let allFilePromises = [];
     if (event.target.files) {
       Array.from(event.target.files).forEach((file) => {
+        const errors = {
+          NOT_SUPPORTED_EXTENSION: false,
+          FILE_SIZE_TOO_LARGE: false,
+          DIMENSION_IMAGE: false,
+        };
+
         if (!hasExtension(file.name)) {
-          notSupportedExtensionErrors.push({ type: ERROR.NOT_SUPPORTED_EXTENSION, filename: file.name });
+          errors.NOT_SUPPORTED_EXTENSION = {type: ERROR.NOT_SUPPORTED_EXTENSION, filename: file.name};
         }
 
         if (file.size > maxFileSize) {
-          fileSizeTooLargeErrors.push({type: ERROR.FILE_SIZE_TOO_LARGE, filename: file.name });
+          errors.FILE_SIZE_TOO_LARGE = {type: ERROR.FILE_SIZE_TOO_LARGE, filename: file.name};
         }
-        if (notSupportedExtensionErrors.length > 0 || fileSizeTooLargeErrors.length > 0) {
-          setErrors({NOT_SUPPORTED_EXTENSION : notSupportedExtensionErrors, FILE_SIZE_TOO_LARGE : fileSizeTooLargeErrors});
-          return false
-        }
-        allFilePromises.push(readFile(file));
+
+        const newFile = new Promise.resolve(async () => ({
+          ...errors,
+          contents: !errors.FILE_SIZE_TOO_LARGE && !errors.NOT_SUPPORTED_EXTENSION ? await readFile(file) : null ,
+        }));
+
+        allFilePromises.push(newFile);
       })
-      if (notSupportedExtensionErrors.length === 0 && fileSizeTooLargeErrors.length === 0) {
-        Promise.all(allFilePromises).then(newFilesData => {
-          newFilesData.forEach((newFileData, index) => {
-            newFileData.file.src = newFileData.dataURL
-            var image = new Image();
-            image.src = newFileData.file.src;
-            image.index = index;
-            image.addEventListener('load', () => {
-              const { width, height } = image;
-              // check aspect ratio of the image
-              if (aspect !== (width / height)) {
-                newFileData.file.needsCropping = true;
-                dimensionErrors.push(
-                  {
-                    index: index + pictures?.length,
-                    type: ERROR.DIMENSION_IMAGE,
-                    filename: newFileData.file.name
-                  }
-                );
-                setErrors({NOT_SUPPORTED_EXTENSION : notSupportedExtensionErrors, FILE_SIZE_TOO_LARGE : fileSizeTooLargeErrors, DIMENSION_IMAGE: [...errors.DIMENSION_IMAGE, ...dimensionErrors.sort(sortErrorsByIndex)]});
+      Promise.all(allFilePromises).then(newFilesData => {
+        newFilesData.forEach((newFileData, index) => {
+          newFileData.contents.file.src = newFileData.contents.dataURL
+          var image = new Image();
+          image.src = newFileData.contents.file.src;
+          image.index = index;
+          image.addEventListener('load', () => {
+            const { width, height } = image;
+            // check aspect ratio of the image
+            if (aspect !== (width / height)) {
+              newFileData.contents.file.needsCropping = true;
+              newFileData.DIMENSION_IMAGE = {
+                  index: index + pictures?.length,
+                  type: ERROR.DIMENSION_IMAGE,
+                  filename: newFileData.contents.file.name
               }
-              setPictures(pictures => [...pictures,newFileData.file] );
-            });
+            }
+            setPictures(pictures => [...pictures, newFileData] );
           });
         });
-      }
+      });
     }
   }, [pictures?.length, aspect, hasExtension, maxFileSize]);
 
   const remove = (index) => {
-    let notSupportedExtensionErrors = errors.NOT_SUPPORTED_EXTENSION;
-    let fileSizeTooLargeErrors = errors.FILE_SIZE_TOO_LARGE;
-    let dimensionErrors = errors.DIMENSION_IMAGE;
-    notSupportedExtensionErrors = notSupportedExtensionErrors.filter(err => err.filename !== pictures[index].name);
-    fileSizeTooLargeErrors = fileSizeTooLargeErrors.filter(err => err.filename !== pictures[index].name);
-    dimensionErrors = dimensionErrors.filter(err => err.index !== index).map((el, i) => ({...el, index: i >= index ? el.index - 1 : el.index}));
-
-    setErrors({NOT_SUPPORTED_EXTENSION : notSupportedExtensionErrors, FILE_SIZE_TOO_LARGE : fileSizeTooLargeErrors, DIMENSION_IMAGE: dimensionErrors.sort(sortErrorsByIndex)});
-
     let newList = pictures.filter((_, i) => i !== index);
     setPictures(newList);
   }
 
   const getChangedPos = (currentPos, newPos) => {
-    let newList = pictures
-    let errorList = errors;
+    let newList = [...pictures];
     let pic = newList.splice(currentPos, 1);
-    newList.splice(newPos - 1, 0, pic[0]);
+    newList.splice(newPos, 0, pic[0]);
 
-    let picError = errorList.DIMENSION_IMAGE.splice(currentPos, 1);
-    errorList.DIMENSION_IMAGE.splice(newPos - 1, 0, picError[0]);
-    errorList.DIMENSION_IMAGE[currentPos].index = currentPos;
-    errorList.DIMENSION_IMAGE[newPos].index = newPos;
     setPictures(newList);
-    setErrors(errorList);
-  };
-
-  const sortErrorsByIndex = (a, b) => {
-    if (a.index > b.index) {
-      return 1
-    } else if (a.index < b.index) {
-      return -1
-    } else {
-      return 0
-    }
   };
 
   const imageUrlToBase64 = async (url) => {
@@ -198,32 +176,35 @@ const UploadPictures = forwardRef((
 
   const saveSocialPictures = useCallback(async () => {
     const selectedPictures = socialRawMediaPictures.filter((_, index) => socialMediaSelectedPictures.includes(index));
-    let dimensionErrors = [];
     const results = await Promise.all(selectedPictures.map(async (item, index) => {
       const src = await imageUrlToBase64(item.src);
       let needsCropping = false;
+      let dimensionError = false;
 
       if (aspect !== (width / height)) {
-        dimensionErrors.push(
-          {
+        dimensionError = {
             index: index + pictures?.length,
             type: ERROR.DIMENSION_IMAGE,
             filename: ''
-          }
-        );
+        }
         needsCropping = true;
       }
 
-      return {src: src, needsCropping: needsCropping};
+      return {
+        src: src, 
+        needsCropping: needsCropping,
+        NOT_SUPPORTED_EXTENSION: false,
+        FILE_SIZE_TOO_LARGE: false,
+        DIMENSION_IMAGE: dimensionError,
+      };
     }))
     if (results) {
       setPictures([...pictures, ...results]);
     }
-    setErrors({NOT_SUPPORTED_EXTENSION : errors.NOT_SUPPORTED_EXTENSION, FILE_SIZE_TOO_LARGE : errors.FILE_SIZE_TOO_LARGE, DIMENSION_IMAGE: [...errors.DIMENSION_IMAGE, ...dimensionErrors.sort(sortErrorsByIndex)]});
     setOpenedSocial(false);
     setSocialMediaRawPictures([]);
     setSocialMediaSelectedPictures([]);
-  }, [pictures, socialMediaSelectedPictures, socialRawMediaPictures, errors]);
+  }, [pictures, socialMediaSelectedPictures, socialRawMediaPictures]);
 
 
   const DraggableRender = useCallback(() => {
@@ -268,20 +249,23 @@ const UploadPictures = forwardRef((
   }
 
   const saveCroppedPicture = (picture) => {
+    let newPicture = {...picture};
+    newPicture.needsCropping = false;
+    newPicture.DIMENSION_IMAGE = false;
+
     setPictures(items => items.map((item, i) =>
       i === indexCrop
-        ? picture
+        ? newPicture
         : item
     ));
     setSrcCrop(false)
     setOpenCrop(false)
     setIndexCrop(false)
-    picture.needsCropping = false;
-    let listErrors = errors.DIMENSION_IMAGE;
-
-    listErrors = listErrors.filter(err => err.index !== indexCrop)
-    setErrors({NOT_SUPPORTED_EXTENSION : errors.NOT_SUPPORTED_EXTENSION, FILE_SIZE_TOO_LARGE : errors.FILE_SIZE_TOO_LARGE, DIMENSION_IMAGE : listErrors});
   }
+
+  const tooLargeErrors = pictures.map(el => (el.FILE_SIZE_TOO_LARGE)).filter(e => !!e);
+  const notSupportedErrors = pictures.map(el => (el.NOT_SUPPORTED_EXTENSION)).filter(e => !!e);
+  const dimensionErrors = pictures.map((el, index) => (el.DIMENSION_IMAGE ? {...el.DIMENSION_IMAGE, index: index} : false)).filter(e => !!e);
 
   return (
     <>
@@ -299,25 +283,28 @@ const UploadPictures = forwardRef((
               : ""}
               <div className="mb-5 upload-body">
                 {
-                    errors.FILE_SIZE_TOO_LARGE && errors.FILE_SIZE_TOO_LARGE.length > 0 ?
+                    tooLargeErrors?.length ? (
                       <div className="alert alert-danger" role="alert">
-                        <strong>{errorMessages[ERROR.FILE_SIZE_TOO_LARGE]}</strong> {errors.FILE_SIZE_TOO_LARGE.map((error) => error.filename).join(', ')}
+                        <strong>{errorMessages[ERROR.FILE_SIZE_TOO_LARGE]}</strong>
+                        {tooLargeErrors.map((error) => error.filename).join(', ')}
                       </div>
-                    :""
+                    ) : ""
                 }
                 {
-                    errors.NOT_SUPPORTED_EXTENSION && errors.NOT_SUPPORTED_EXTENSION.length > 0 ?
+                    notSupportedErrors?.length ? (
                       <div className="alert alert-danger" role="alert">
-                        <strong>{errorMessages[ERROR.NOT_SUPPORTED_EXTENSION]}</strong> {errors.NOT_SUPPORTED_EXTENSION.map((error) => error.filename).join(', ')}
+                        <strong>{errorMessages[ERROR.NOT_SUPPORTED_EXTENSION]}</strong>
+                        {notSupportedErrors.map((error) => error.filename).join(', ')}
                       </div>
-                    :""
+                    ) : ""
                 }
                 {
-                    errors.DIMENSION_IMAGE && errors.DIMENSION_IMAGE.length > 0 ?
+                    dimensionErrors?.length ? (
                       <div className="alert alert-warning" role="alert">
-                        <strong>{errorMessages[ERROR.DIMENSION_IMAGE]}</strong> {errors.DIMENSION_IMAGE.map((error) => '[' + error.index + ']').join(', ')}
+                        <strong>{errorMessages[ERROR.DIMENSION_IMAGE]}</strong>
+                        {dimensionErrors.map((el) => '[' + el.index + ']').join(', ')}
                       </div>
-                    :""
+                    ) : ""
                 }
                 {
                   drag && pictures.length === 0 && instructions &&
@@ -380,7 +367,7 @@ const UploadPictures = forwardRef((
                 size="xl"
                 keyboard={true}>
                 <Modal.Header closeButton>
-                  <Modal.Title>Select Images</Modal.Title>
+                  <Modal.Title>{multiple ? "Select Images" : "Select an Image"}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                 <SocialMediaImportPopup
@@ -391,6 +378,7 @@ const UploadPictures = forwardRef((
                       iconSize="lg"
                       handleClose= { () => setOpenedSocial(false)}
                       setPhotosCallback={setSocialMediaPhotosCallback}
+                      multiple={multiple}
                     />
                 </Modal.Body>
                 <Modal.Footer>

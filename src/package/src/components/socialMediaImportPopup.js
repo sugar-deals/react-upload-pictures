@@ -32,7 +32,7 @@ const SocialMediaImportPopup = forwardRef((
     handleClose = () => { },
     setPhotosCallback = () => { },
     token = '',
-
+    multiple = false,
   },
   ref
 ) => {
@@ -191,16 +191,27 @@ const SocialMediaImportPopup = forwardRef((
   const toggleMarkSelected = useCallback((pos) => {
       let result;
 
-      if (selected.includes(pos)) {
-          result = selected.filter(el => el !== pos);
-          setSelected(result);
-          setPhotosCallback(pictures, result);
+      if (!multiple) {
+        if (selected.includes(pos)) {
+          setSelected([]);
+          setPhotosCallback(pictures, []);
+        } else {
+            result = [pos];
+            setSelected(result);
+            setPhotosCallback(pictures, result);
+        }
       } else {
-          result = [...selected, pos];
-          setSelected(result);
-          setPhotosCallback(pictures, result);
+        if (selected.includes(pos)) {
+            result = selected.filter(el => el !== pos);
+            setSelected(result);
+            setPhotosCallback(pictures, result);
+        } else {
+            result = [...selected, pos];
+            setSelected(result);
+            setPhotosCallback(pictures, result);
+        }
       }
-  }, [pictures, selected])
+  }, [pictures, selected, multiple])
 
   const responseFacebook = (response) => {
     if (response && response?.accessToken) {
