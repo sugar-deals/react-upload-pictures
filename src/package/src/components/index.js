@@ -3,6 +3,7 @@ import React, {useCallback, useState, forwardRef, useImperativeHandle, useEffect
 import "../assets/style/index.scss"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCropSimple, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faFacebook, faInstagram } from '@fortawesome/free-brands-svg-icons';
 import { Button, Modal } from 'react-bootstrap';
 import { Draggable } from "react-drag-reorder";
 
@@ -328,8 +329,8 @@ const UploadPictures = forwardRef((
                     <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={multiple}/>
                   </div>
                   <div className="col social-buttons">
-                    <button onClick={() => setOpenedSocial('facebook')} className="facebook-import-button">Import from Facebook</button>
-                    <button onClick={() => setOpenedSocial('instagram')} className="instagram-import-button">Import from Instagram</button>
+                    <button onClick={() => setOpenedSocial('facebook')} className="facebook-import-button"><FontAwesomeIcon icon={faFacebook} size={iconSize} className="facebook-import-button-icon"/></button>
+                    <button onClick={() => setOpenedSocial('instagram')} className="instagram-import-button"><FontAwesomeIcon icon={faInstagram} size={iconSize} className="instagram-import-button-icon"/></button>
                   </div>
                 </div>
                 {
