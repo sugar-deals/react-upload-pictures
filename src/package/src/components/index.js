@@ -333,11 +333,11 @@ const UploadPictures = forwardRef((
                     </div>
                   </div>
                 }
-                <div className="row justify-content-center mb-5">
-                  <div className="col" style={{width: "auto"}}>
+                <div className="row mb-5">
+                  <div className="col">
                     <input onChange={onFileChange} className="form-control" type="file" id="formFile" multiple={multiple}/>
                   </div>
-                  <div className="col social-buttons">
+                  <div className="col-auto ml-auto social-buttons">
                     <button onClick={() => setOpenedSocial('facebook')} className="facebook-import-button"><FontAwesomeIcon icon={faFacebook} size={iconSize} className="facebook-import-button-icon"/></button>
                     <button onClick={() => setOpenedSocial('instagram')} className="instagram-import-button"><FontAwesomeIcon icon={faInstagram} size={iconSize} className="instagram-import-button-icon"/></button>
                   </div>
