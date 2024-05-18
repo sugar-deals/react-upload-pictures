@@ -21,7 +21,7 @@ function App() {
 
   const updatePhotos = (photos) => {
     setHasPhotos(photos && photos.length > 0);
-    let foundUncroppedPhoto = photos.find((photo) => photo.contents.file.needsCropping);
+    let foundUncroppedPhoto = photos.find((photo) => photo.contents?.file?.needsCropping);
     if (foundUncroppedPhoto) {
         setHasUncroppedPhotos(true);
     } else {

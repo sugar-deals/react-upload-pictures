@@ -51,7 +51,7 @@ const UploadPictures = forwardRef((
       };
     },
     getPictures() {
-      return pictures.map(el => el.contents.file);
+      return pictures.map(el => el.contents?.file);
     },
   }));
   const [pictures, setPictures] = useState([]);
@@ -95,6 +95,9 @@ const UploadPictures = forwardRef((
   }
 
   const onFileChange = useCallback(event => {
+    // Clear prev error files
+    setPictures(pictures => pictures.filter(e => !!e?.contents));
+
     let allFilePromises = [];
     if (event.target.files) {
       Array.from(event.target.files).forEach((file) => {
@@ -122,6 +125,11 @@ const UploadPictures = forwardRef((
 
       Promise.all(allFilePromises).then(newFilesData => {
         newFilesData.forEach((newFileData, index) => {
+          if (!newFileData.contents) {
+            setPictures(pictures => [...pictures, newFileData] );
+            return;
+          }
+          
           newFileData.contents.file.src = newFileData.contents.dataURL
           var image = new Image();
           image.src = newFileData.contents.file.src;
@@ -179,7 +187,7 @@ const UploadPictures = forwardRef((
   const saveSocialPictures = useCallback(async () => {
     const selectedPictures = socialRawMediaPictures.filter((_, index) => socialMediaSelectedPictures.includes(index));
     const results = await Promise.all(selectedPictures.map(async (item, index) => {
-      const src = await imageUrlToBase64(item.src);
+      const src = await imageUrlToBase64(item?.src);
       let needsCropping = false;
       let dimensionError = false;
 
@@ -219,9 +227,9 @@ const UploadPictures = forwardRef((
         {
           pictures.length > 0 && pictures.map((picture, index) => {
             return (
-                <div className={`${picture.contents.file.needsCropping ? "border border-warning" : ""} position-relative p-0 mx-2 drager-pictures`} key={index} style={{ width: width }}>
+                <div className={`${picture.contents?.file?.needsCropping ? "border border-warning" : ""} position-relative p-0 mx-2 drager-pictures`} key={index} style={{ width: width }}>
                   <Actions index={index} iconSize={iconSize} remove={remove} cropPicture={cropPicture} crop={crop} />
-                  <ImageDisplay picture={picture.contents.file} height={height} width={width} className="mb-4" />
+                  <ImageDisplay picture={picture.contents?.file} height={height} width={width} className="mb-4" />
                 </div>
             )
             })
@@ -238,7 +246,7 @@ const UploadPictures = forwardRef((
           pictures && pictures.map((picture, index) => (
             <div className="position-relative p-0 mx-2" key={index} style={{ width: width, height: height }}>
               <Actions index={index} iconSize={iconSize} remove={remove} cropPicture={cropPicture} crop={crop} />
-              <ImageDisplay picture={picture.contents.file} height={height} width={width} className="mb-4" />
+              <ImageDisplay picture={picture.contents?.file} height={height} width={width} className="mb-4" />
             </div>
           ))
         }
@@ -277,6 +285,7 @@ const UploadPictures = forwardRef((
   const tooLargeErrors = pictures.map(el => (el.FILE_SIZE_TOO_LARGE)).filter(e => !!e);
   const notSupportedErrors = pictures.map(el => (el.NOT_SUPPORTED_EXTENSION)).filter(e => !!e);
   const dimensionErrors = pictures.map((el, index) => (el.DIMENSION_IMAGE ? {...el.DIMENSION_IMAGE, index: index} : false)).filter(e => !!e);
+  const shownPictures = pictures.filter(pic => !!pic?.contents);
 
   return (
     <>
@@ -318,7 +327,7 @@ const UploadPictures = forwardRef((
                     ) : ""
                 }
                 {
-                  drag && pictures.length === 0 && instructions &&
+                  drag && shownPictures.length === 0 && instructions &&
                   <div className="mb-2">
                     <div className="alert alert-info" role="alert" dangerouslySetInnerHTML={{ __html: instructions }}>
                     </div>
@@ -343,7 +352,7 @@ const UploadPictures = forwardRef((
                       )
                 }
                 {
-                    drag && pictures.length > 1 &&
+                    drag && shownPictures.length > 1 &&
                     <div className="mb-2">
                       <div className="alert alert-info" role="alert">
                       {dragDescription}
@@ -352,12 +361,12 @@ const UploadPictures = forwardRef((
                 }
                 <div className="row d-flex justify-content-center space-photos">
                   {
-                    drag && pictures.length > 0 && (
+                    drag && shownPictures.length > 0 && (
                       <DraggableRender />
                     )
                   }
                   {
-                      !drag && pictures.length > 0 && (
+                      !drag && shownPictures.length > 0 && (
                           <ImagesRender />
                       )
                   }
@@ -408,7 +417,7 @@ const UploadPictures = forwardRef((
 
 
 function ImageDisplay({ picture, width, height }) {
-  return <img src={picture.src} style={{
+  return <img src={picture?.src} style={{
     height: height,
     width: width,
   }} className="mb-4" alt=""/>

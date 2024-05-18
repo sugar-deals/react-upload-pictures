@@ -291,7 +291,7 @@ const SocialMediaImportPopup = forwardRef((
 })
 
 function ImageDisplay({ picture, width, height }) {
-  return <LazyLoadImage src={picture.src} style={{
+  return <LazyLoadImage src={picture?.src} style={{
     height: height,
     width: width,
   }} alt="Social media picture" effect="opacity" width={width} height={height} placeholder={<LoadingIndicator />} />
