@@ -2,7 +2,7 @@ import React, {useCallback, useState, forwardRef, useImperativeHandle, useEffect
 
 import "../assets/style/index.scss"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCropSimple, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faCropSimple, faXmark, faFileImport } from "@fortawesome/free-solid-svg-icons";
 import { faFacebook, faInstagram } from '@fortawesome/free-brands-svg-icons';
 import { Button, Modal } from 'react-bootstrap';
 import { Draggable } from "react-drag-reorder";
@@ -403,10 +403,10 @@ const UploadPictures = forwardRef((
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setOpenedSocial(false)}>
-                        Close
+                        <FontAwesomeIcon icon={faXmark} size={iconSize}/>
                     </Button>
                     <Button variant="primary" className="text-white" onClick={saveSocialPictures} disabled={!socialMediaSelectedPictures?.length} data-bs-toggle="tooltip" data-bs-placement="top" title="Tooltip on top">
-                        Save
+                        <FontAwesomeIcon icon={faFileImport} size={iconSize}/>
                     </Button>
                 </Modal.Footer>
             </Modal>
