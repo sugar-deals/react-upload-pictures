@@ -11,6 +11,7 @@ function App() {
   const [hasUncroppedPhotos, setHasUncroppedPhotos] = useState(false)
   const submitForm = () => {
     let pic = ref.current.getPictures();
+    debugger
     console.log(pic);
   }
 
@@ -20,7 +21,10 @@ function App() {
   }
 
   const updatePhotos = (photos) => {
-    setHasPhotos(photos && photos.length > 0);
+    let numberOfValidPhotos = photos ? photos.filter(function(item) {
+        return !item.DIMENSION_IMAGE && !item.FILE_SIZE_TOO_LARGE && !item.NOT_SUPPORTED_EXTENSION && item.contents && item.contents !== null
+    }).length : 0;
+    setHasPhotos(numberOfValidPhotos > 0);
     let foundUncroppedPhoto = photos.find((photo) => photo.contents?.file?.needsCropping);
     if (foundUncroppedPhoto) {
         setHasUncroppedPhotos(true);

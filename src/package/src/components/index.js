@@ -125,7 +125,7 @@ const UploadPictures = forwardRef((
 
       Promise.all(allFilePromises).then(newFilesData => {
         newFilesData.forEach((newFileData, index) => {
-          if (!newFileData.contents) {
+          if (!newFileData.contents || newFileData.contents === null) {
             setPictures(pictures => [...pictures, newFileData] );
             return;
           }
