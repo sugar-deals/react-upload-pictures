@@ -125,6 +125,7 @@ const UploadPictures = forwardRef((
 
       Promise.all(allFilePromises).then(newFilesData => {
         newFilesData.forEach((newFileData, index) => {
+        debugger
           if (!newFileData.contents || newFileData.contents === null) {
             setPictures(pictures => [...pictures, newFileData] );
             return;
@@ -226,7 +227,8 @@ const UploadPictures = forwardRef((
       <Draggable onPosChange={getChangedPos}>
         {
           pictures.length > 0 && pictures.map((picture, index) => {
-            return (
+          debugger
+            return !picture.FILE_SIZE_TOO_LARGE && !picture.NOT_SUPPORTED_EXTENSION && picture.contents && picture.contents !== null && (
                 <div className={`${picture.contents?.file?.needsCropping ? "border border-warning" : ""} position-relative p-0 mx-2 drager-pictures`} key={index} style={{ width: width }}>
                   <Actions index={index} iconSize={iconSize} remove={remove} cropPicture={cropPicture} crop={crop} />
                   <ImageDisplay picture={picture.contents?.file} height={height} width={width} className="mb-4" />
