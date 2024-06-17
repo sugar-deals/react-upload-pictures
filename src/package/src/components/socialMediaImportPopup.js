@@ -44,6 +44,7 @@ const SocialMediaImportPopup = forwardRef((
       return pictures;
     },
   }));
+  const [instagramUserId, setInstagramUserId] = useState(null);
   const [pictures, setPictures] = useState([]);
   const [selected, setSelected] = useState([]);
   const [currentToken, setCurrentToken] = useState(token);
@@ -125,14 +126,17 @@ const SocialMediaImportPopup = forwardRef((
       return await response.json();
   }
   
-  async function fetchInstagramPic(accessToken) {
-    const userId = await(await fetch(`https://graph.instagram.com/me?fields=id&access_token=${accessToken}`))?.json();
+  async function fetchInstagramPic(accessToken, userId) {
     const response = await fetch(`https://graph.instagram.com/${userId?.id}/media?access_token=${accessToken}`);
     return await response.json();
   }
 
   const getAlbums = useCallback(async (takeFromFB=true) => {
-      const response = takeFromFB ? await fetchFBPic('me/albums?fields=id,name', currentToken) : await fetchInstagramPic(currentToken)
+      const userId = await(await fetch(`https://graph.instagram.com/me?fields=id,username&access_token=${currentToken}`))?.json();
+      setInstagramUserId(userId?.username);
+
+      const response = takeFromFB ? await fetchFBPic('me/albums?fields=id,name', currentToken) : await fetchInstagramPic(currentToken, userId)
+
       if(response.data && response.data.length > 0) {
          if (takeFromFB) {
           await response.data.forEach(async album => {
@@ -235,7 +239,7 @@ const SocialMediaImportPopup = forwardRef((
 
                 <div className="mb-2">
                   <div className="alert alert-info" role="alert">
-                      {`(${selected?.length}) pictures selected`}
+                      {instagramUserId !== null ? `Photos of ${instagramUserId}. (${selected?.length}) pictures selected` : `Loading...`}
                   </div>
                 </div>
             
